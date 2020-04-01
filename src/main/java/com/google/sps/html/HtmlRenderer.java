@@ -11,6 +11,9 @@ import java.io.IOException;
 
 /**
  * Html generator abstraction, for producing HTML for various web pages.
+ *
+ * FreeMarker documentation:
+ * https://freemarker.apache.org/docs/dgui_template_overallstructure.html
  */
 public class HtmlRenderer {
 
