@@ -2,6 +2,7 @@
 
 title Learning Paths (data model)
 
+
 class LearningPath {
  +long id
  +String name
@@ -9,6 +10,7 @@ class LearningPath {
 }
 
 class LearningSection {
+ +long id
  +long learningPath
  +String name
  +String description

@@ -48,17 +48,18 @@ public class LearningPathServlet extends HttpServlet {
 		TestData.setupTestData(service);
 	}
 
+
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		User user = UserService.getUser();
 
 		System.out.println(request.getPathInfo());
 		// TODO figure out which path to load, based on the ID
-		int id = 1;
 		String[] parts = request.getPathInfo().split("/");
-		if (parts.length != 1) {
+		if (parts.length != 2) {
 			throw new IllegalStateException(request.getPathInfo());
 		}
+		int id = Integer.parseInt(parts[1]);
 
 		try {
 			LearningPath path = service.load(id);

@@ -71,7 +71,7 @@ public class LearningPathService {
 
 		List<LearningSection> sections = loadSections(id);
 
-		LearningPath result = new LearningPath(name, path.getKey().getId());
+		LearningPath result = new LearningPath(path.getKey().getId(), name, "description");
 		result.getSections().addAll(sections);
 		return result;
 	}
@@ -84,8 +84,8 @@ public class LearningPathService {
 		List<Entity> sections = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
 
 		return sections.stream()
-				.map(e -> new LearningSection((String) e.getProperty("name"), e.getKey().getId(),
-						(long) e.getProperty("sequence")))
+				.map(e -> new LearningSection(e.getKey().getId(), (String) e.getProperty("name"),
+						"description", (long) e.getProperty("sequence")))
 				.collect(Collectors.toList());
 	}
 

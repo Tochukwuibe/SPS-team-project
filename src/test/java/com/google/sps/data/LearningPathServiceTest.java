@@ -32,8 +32,8 @@ public class LearningPathServiceTest {
 	public void testGetLearningPaths() {
 
 		LearningPathService svc = new LearningPathService();
-		svc.store(new LearningPath("Path 1", 1));
-		svc.store(new LearningPath("Path 2", 2));
+		svc.store(new LearningPath(1, "Path 1", "description"));
+		svc.store(new LearningPath(2, "Path 2", "description"));
 
 		List<LearningPathSummary> list = svc.listLearningPaths();
 
@@ -42,16 +42,16 @@ public class LearningPathServiceTest {
 
 	@Test
 	public void saveComplexLearningPath() throws EntityNotFoundException {
-		LearningSection html = new LearningSection("HTML", 12, 0);
+		LearningSection html = new LearningSection(12, "HTML", "description", 0);
 		html.getItems().add("Item 1");
 		html.getItems().add("Item 2");
 
-		LearningSection css = new LearningSection("CSS", 11, 1);
+		LearningSection css = new LearningSection(11, "CSS", "description", 1);
 		// TODO make items not just strings!
 		css.getItems().add("Item 3");
 		css.getItems().add("Item 4");
 
-		LearningPath path = new LearningPath("Web Development", 1);
+		LearningPath path = new LearningPath(1, "Web Development", "description");
 		path.getSections().add(html);
 		path.getSections().add(css);
 
@@ -65,18 +65,18 @@ public class LearningPathServiceTest {
 
 	@Test
 	public void updateLearningPath() throws EntityNotFoundException {
-		LearningSection html = new LearningSection("HTML", 12, 0);
+		LearningSection html = new LearningSection(12, "HTML", "description", 0);
 		html.getItems().add("Item 1");
 		html.getItems().add("Item 2");
 
-		LearningSection css = new LearningSection("CSS", 11, 1);
+		LearningSection css = new LearningSection(11, "CSS", "description", 1);
 		css.getItems().add("Item 3");
 		css.getItems().add("Item 4");
 
-		LearningPath initial = new LearningPath("Web Development", 1);
+		LearningPath initial = new LearningPath(1, "Web Development", "description");
 		initial.getSections().add(css);
 
-		LearningPath updated = new LearningPath("New Name", 1);
+		LearningPath updated = new LearningPath(1, "New Name", "description");
 		updated.getSections().add(html);
 
 		LearningPathService svc = new LearningPathService();
