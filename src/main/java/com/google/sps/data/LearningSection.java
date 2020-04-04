@@ -9,10 +9,12 @@ public class LearningSection {
 
 	// Should not be Strings, just for example
 	private List<String> items = new ArrayList<>();
+	private long sequence;
 
-	public LearningSection(String name, long id) {
+	public LearningSection(String name, long id, long sequence) {
 		this.name = name;
 		this.id = id;
+		this.sequence = sequence;
 	}
 
 	public String getName() {
@@ -25,5 +27,13 @@ public class LearningSection {
 
 	public List<String> getItems() {
 		return items;
+	}
+
+	public long getSequence() {
+		return sequence;
+	}
+
+	public void setSequence(int sequence) {
+		this.sequence = sequence;
 	}
 }

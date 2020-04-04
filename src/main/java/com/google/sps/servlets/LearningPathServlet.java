@@ -48,11 +48,11 @@ public class LearningPathServlet extends HttpServlet {
 
 		// TODO figure out which path to load, based on the ID
 
-		LearningSection html = new LearningSection("HTML", 11);
+		LearningSection html = new LearningSection("HTML", 11, 0);
 		html.getItems().add("Item 1");
 		html.getItems().add("Item 2");
 
-		LearningSection css = new LearningSection("CSS", 11);
+		LearningSection css = new LearningSection("CSS", 11, 0);
 		css.getItems().add("Item 3");
 		css.getItems().add("Item 4");
 
