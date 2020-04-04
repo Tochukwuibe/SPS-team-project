@@ -23,8 +23,9 @@ public class LearningPathService {
     }
 
     public LearningPath create(LearningPath path) {
-        Entity task = new Entity(this.kind)
-                    .setProperty("name", path.name)
+        Entity task = new Entity(this.kind);
+
+        task.setProperty("name", path.name)
 
         Key taskKey =  datastore.put(task);
 
@@ -33,13 +34,13 @@ public class LearningPathService {
 
     public Collection<LearningPath> getMany() {
 
-        Query<Entity> query = Query.newEntityQueryBuilder().setKind(kind).build();
+        Query<Entity> query = Query(this.kind);
+
         QueryResults<Entity> tasks = datastore.run(query);
         Collection<LearningPath> paths = new ArrayList<>();
 
         while (tasks.hasNext()) {
             Entity task = tasks.next();
-
             LearningPath path = new LearningPath(task.getProperty("name"), task.getKey().getId());
             paths.add(path);
         }
@@ -57,23 +58,26 @@ public class LearningPathService {
 
     public LearningPath update(long id, LearningPath path) {
 
-        Key taskKey = KeyFactory.createKey(this.kind, id);
+          // do null check and throw some 404 exception
+
+        Key taskKey = KeyFactory.createKey(kind, id);
 
         Entity src = datastore.get(taskKey);
+        Entity task = Entity (kind, id);
 
-        Entity task = Entity ()
         task.setPropertiesFrom(src);
-
         task.setProperty("name", path.name);
 
+        datastore.put(task);
 
-        datastore.update(task);
+        return new LearningPath(path.name, id);
     }
 
     public void delete(long id) {
 
         Key taskKey = KeyFactory.createKey(kind, id);
         datastore.delete(taskKey);
+
     }
 
 

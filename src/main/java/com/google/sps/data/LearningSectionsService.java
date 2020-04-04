@@ -22,21 +22,21 @@ public class LearningSectionsService {
 
     public Long create(LearningSection section, long learningPathId) {
 
-        Key taskKey =  keyFactory.newKey();
+        Entity task = new Entity(this.kind);
 
-        Entity task = Entity.newBuilder(taskKey)
-                    .set("name", section.name)
-                    .set("learningPathId", learningPathId)
-                    .build();
+        task.setProperty("name", section.name);
+        task.setProperty("learningPathId", learningPathId);
 
-        datastore.put(task);
+        Key taskKey = datastore.put(task);
 
         return new LearningSection(section.name, taskKey.getId());
                         
     }
 
     public Collection<LearningSection> getMany() {
-        Query<Entity> query = Query.newEntityQueryBuilder().setKind(kind).build();
+
+        Query<Entity> query = Query(this.kind);
+
         QueryResults<Entity> tasks = datastore.run(query);
         Collection<LearningSection> paths = new ArrayList<>();
 
@@ -52,7 +52,7 @@ public class LearningSectionsService {
 
     public Collection<LearningSection> getMany(long learningPathId) {
 
-        Query<Entity> query = Query.newEntityQueryBuilder().setKind(kind).build();
+        Query<Entity> query = Query(this.kind);
         QueryResults<Entity> tasks = datastore.run(query);
         Collection<LearningSection> paths = new ArrayList<>();
 
@@ -67,21 +67,26 @@ public class LearningSectionsService {
     }
 
     public LearningSection getOne(long id) {
+      
+
         Key taskKey = KeyFactory.createKey(kind, id);
         Entity task = datastore.get(taskKey);
 
         return new LearningSection(task.getProperty("name"), task.getKey().getId());
+
     }
 
     public LearningSection update(long id, LearningSection section) {
 
-        Key taskKey = KeyFactory.createKey(kind, id);
-        Entity task = Entity.newBuilder(datastore.get(taskKey))
-        .set("name", section.name)
-        .build();
+        Entity src = datastore.get(taskKey);
 
+        Entity task = Entity ();
+        
+        task.setProperty("name", section.name)
+ 
         datastore.update(task);
 
+        return new LearningSection(section.name, id);
     }
 
     public void delete(long id) {
