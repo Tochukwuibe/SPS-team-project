@@ -43,3 +43,11 @@
                 </div>
         </div>
 </nav>
+
+<div id="login">
+    <#if user.loggedIn>
+            <a href="/EditProfile">Hello ${user.name}</a> (<a href="${user.logoutLink}">Logout</a>)
+    <#else>
+            <a href="${user.loginLink}">Login</a>
+    </#if>
+</div>

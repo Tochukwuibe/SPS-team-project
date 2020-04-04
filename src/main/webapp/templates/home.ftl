@@ -1,7 +1,7 @@
 <#include "common/header.ftl">
 
 <div class="container">
-        <h1>Hello ${user.name} (${user.id})</h1>
+        <h1>Welcome ${user.name}</h1>
 
         <h3>Learning Paths:</h3>
         <ul>

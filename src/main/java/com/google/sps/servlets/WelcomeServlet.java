@@ -43,7 +43,8 @@ public class WelcomeServlet extends HttpServlet {
 
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		LandingPageModel model = new LandingPageModel(new User("Patrick", 42L));
+		User user = UserService.getUser();
+		LandingPageModel model = new LandingPageModel(user);
 		model.getLearningPaths().add(new LearningPathSummary(1, "Web Development"));
 		model.getLearningPaths().add(new LearningPathSummary(2, "Surviving COVID-19"));
 
