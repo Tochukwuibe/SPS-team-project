@@ -90,10 +90,10 @@ public class EditProfileServlet extends HttpServlet {
     PreparedQuery results = datastore.prepare(query);
     Entity entity = results.asSingleEntity();
     if (entity == null) {
-      return "";
+      return null; //FIXME;
     }
     String nickname = (String) entity.getProperty("nickname");
-    User current = new User((String) entity.getProperty("nickname"), id);
+    User current = null; // FIXMEnew User((String) entity.getProperty("nickname"), id);
 
     // rest of future user attributes 
     

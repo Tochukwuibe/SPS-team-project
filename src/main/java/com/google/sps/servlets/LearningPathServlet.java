@@ -44,6 +44,7 @@ public class LearningPathServlet extends HttpServlet {
 
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		User user = UserService.getUser();
 
 		// TODO figure out which path to load, based on the ID
 
@@ -59,7 +60,7 @@ public class LearningPathServlet extends HttpServlet {
 		path.getSections().add(html);
 		path.getSections().add(css);
 
-		LearningPathModel model = new LearningPathModel(new User("Patrick", 42), path);
+		LearningPathModel model = new LearningPathModel(user, path);
 		renderer.renderLearningPath(model, response);
 	}
 }
