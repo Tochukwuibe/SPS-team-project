@@ -14,8 +14,11 @@
 
 package com.google.sps.servlets;
 
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.sps.data.LearningPath;
+import com.google.sps.data.LearningPathService;
 import com.google.sps.data.LearningSection;
+import com.google.sps.data.TestData;
 import com.google.sps.data.User;
 import com.google.sps.html.HtmlRenderer;
 import com.google.sps.html.LearningPathModel;
@@ -35,32 +38,35 @@ import java.io.IOException;
 public class LearningPathServlet extends HttpServlet {
 
 	private HtmlRenderer renderer;
+	private LearningPathService service;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		renderer = new HtmlRenderer(config.getServletContext());
+		service = new LearningPathService();
+		TestData.setupTestData(service);
 	}
 
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		User user = UserService.getUser();
 
+		System.out.println(request.getPathInfo());
 		// TODO figure out which path to load, based on the ID
+		int id = 1;
+		String[] parts = request.getPathInfo().split("/");
+		if (parts.length != 1) {
+			throw new IllegalStateException(request.getPathInfo());
+		}
 
-		LearningSection html = new LearningSection("HTML", 11, 0);
-		html.getItems().add("Item 1");
-		html.getItems().add("Item 2");
-
-		LearningSection css = new LearningSection("CSS", 11, 0);
-		css.getItems().add("Item 3");
-		css.getItems().add("Item 4");
-
-		LearningPath path = new LearningPath("Web Development", 1);
-		path.getSections().add(html);
-		path.getSections().add(css);
-
-		LearningPathModel model = new LearningPathModel(user, path);
-		renderer.renderLearningPath(model, response);
+		try {
+			LearningPath path = service.load(id);
+			LearningPathModel model = new LearningPathModel(user, path);
+			renderer.renderLearningPath(model, response);
+		} catch (EntityNotFoundException e) {
+			System.out.printf("Error: learning path %d not found", id);
+			response.sendError(404);
+		}
 	}
 }

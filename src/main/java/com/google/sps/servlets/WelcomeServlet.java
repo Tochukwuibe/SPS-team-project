@@ -14,10 +14,10 @@
 
 package com.google.sps.servlets;
 
+import com.google.sps.data.LearningPathService;
 import com.google.sps.data.User;
 import com.google.sps.html.HtmlRenderer;
 import com.google.sps.html.LandingPageModel;
-import com.google.sps.html.LearningPathSummary;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -34,19 +34,22 @@ import java.io.IOException;
 public class WelcomeServlet extends HttpServlet {
 
 	private HtmlRenderer renderer;
+	private LearningPathService service;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		super.init(config);
 		renderer = new HtmlRenderer(config.getServletContext());
+		service = new LearningPathService();
+
 	}
 
 	@Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		User user = UserService.getUser();
+
 		LandingPageModel model = new LandingPageModel(user);
-		model.getLearningPaths().add(new LearningPathSummary(1, "Web Development"));
-		model.getLearningPaths().add(new LearningPathSummary(2, "Surviving COVID-19"));
+		model.getLearningPaths().addAll(service.listLearningPaths());
 
 		renderer.renderLandingPage(model, response);
 	}
