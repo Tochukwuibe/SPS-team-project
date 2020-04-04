@@ -64,7 +64,7 @@ public class LearningPathService {
         Entity task = Entity ()
         task.setPropertiesFrom(src);
 
-        task.setProperty("name", )
+        task.setProperty("name", path.name);
 
 
         datastore.update(task);
