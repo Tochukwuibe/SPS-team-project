@@ -1,0 +1,52 @@
+@startuml
+
+title Learning Paths (data model)
+
+class LearningPath {
+ +long id
+ +String name
+ +String description
+}
+
+class LearningSection {
+ +long learningPath
+ +String name
+ +String description
+ +long sequence
+}
+
+class LearningItem {
+ +long id
+ +long learningSection
+ +long sequence
+
+ +String name
+ +String description
+ +String url
+
+ +long ratingCount
+ +long ratingTotal
+}
+
+
+class ItemFeedback {
+ +long id
+ +long learningPath
+ +long learningItem
+ +long userId
+
+ +Int rating
+ +boolean completed
+}
+
+class User {
+ +Long id
+}
+
+LearningPath "1" *-- "*" LearningSection
+LearningSection "1" *-- "*" LearningItem
+LearningItem "1" -- "*" ItemFeedback
+ItemFeedback "*" -- "1" User
+
+
+@enduml
