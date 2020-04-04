@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LearningSection {
-	private String name;
 	private long id;
+	private String name;
+	private long sequence;
 
 	// Should not be Strings, just for example
 	private List<String> items = new ArrayList<>();
-	private long sequence;
 
 	public LearningSection(String name, long id, long sequence) {
 		this.name = name;
