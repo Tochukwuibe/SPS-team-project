@@ -1,6 +1,5 @@
 package com.google.sps.data;
 
-
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
@@ -14,10 +13,11 @@ import com.google.sps.html.LearningPathSummary;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
 public class LearningPathService {
+
 	private static final String LEARNING_PATH = "LearningPath";
 	private static final String LEARNING_SECTION = "LearningSection";
+	private static final String LEARNING_ITEM = "LearningItem";
 
 	private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
@@ -26,12 +26,11 @@ public class LearningPathService {
 	}
 
 	public List<LearningPathSummary> listLearningPaths() {
-		Query query = new Query(this.LEARNING_PATH).addSort("name");
+		Query query = new Query(LEARNING_PATH).addSort("name");
 
 		List<Entity> entities = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
 
-		return entities.stream()
-				.map(e -> new LearningPathSummary(e.getKey().getId(), (String) e.getProperty("name")))
+		return entities.stream().map(e -> new LearningPathSummary(e.getKey().getId(), (String) e.getProperty("name")))
 				.collect(Collectors.toList());
 	}
 
@@ -41,12 +40,13 @@ public class LearningPathService {
 	 * @param path
 	 */
 	public void store(LearningPath path) {
+
 		Entity task = new Entity(LEARNING_PATH, path.getId());
 		task.setProperty("name", path.getName());
 		Key taskKey = datastore.put(task);
 
-
 		List<LearningSection> existing = loadSections(path.getId());
+
 		// TODO optimize this to only delete no-longer present items
 		for (LearningSection ex : existing) {
 			datastore.delete(KeyFactory.createKey(LEARNING_SECTION, ex.getId()));
@@ -77,20 +77,47 @@ public class LearningPathService {
 	}
 
 	private List<LearningSection> loadSections(long id) {
-		Query query = new Query(LEARNING_SECTION)
-				.addSort("sequence")
+		Query query = new Query(LEARNING_SECTION).addSort("sequence")
 				.setFilter(new Query.FilterPredicate("learningPath", Query.FilterOperator.EQUAL, id));
 
 		List<Entity> sections = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
 
-		return sections.stream()
-				.map(e -> new LearningSection(e.getKey().getId(), (String) e.getProperty("name"),
-						"description", (long) e.getProperty("sequence")))
-				.collect(Collectors.toList());
+		return sections.stream().map(e -> mapEntityToLearningSection(e)).collect(Collectors.toList());
 	}
 
-//    public void delete(long id) {
-//        Key taskKey = KeyFactory.createKey(kind, id);
-//        datastore.delete(taskKey);
-//    }
+	private LearningSection mapEntityToLearningSection(Entity e) {
+		LearningSection section = new LearningSection(e.getKey().getId(), (String) e.getProperty("name"),
+				"description", (long) e.getProperty("sequence"));
+
+		List<LearningItem> items = loadItems(section.getId());
+
+		section.getItems().addAll(items);
+
+		return section;
+	}
+
+	private List<LearningItem> loadItems(long id) {
+		Query query = new Query(LEARNING_ITEM).addSort("sequence")
+				.setFilter(new Query.FilterPredicate("learningSection", Query.FilterOperator.EQUAL, id));
+
+		List<Entity> items = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
+
+		return items.stream().map(e -> mapEntityToLearningItem(id, e)).collect(Collectors.toList());
+	}
+
+	private LearningItem mapEntityToLearningItem(long id, Entity e) {
+		String name = (String) e.getProperty("name");
+		String description = (String) e.getProperty("description");
+		long sequence = (long) e.getProperty("sequence");
+		String url = (String) e.getProperty("url");
+		int ratingCount = (int) e.getProperty("ratingCount");
+		int ratingTotal = (int) e.getProperty("ratingTotal");
+
+		return new LearningItem(name, id, description, sequence, url, ratingCount, ratingTotal);
+	}
+
+	// public void delete(long id) {
+	// Key taskKey = KeyFactory.createKey(kind, id);
+	// datastore.delete(taskKey);
+	// }
 }
