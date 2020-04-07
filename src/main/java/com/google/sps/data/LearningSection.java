@@ -10,7 +10,7 @@ public class LearningSection {
 	private final long sequence;
 
 	// Should not be Strings, just for example
-	private List<String> items = new ArrayList<>();
+	private List<LearningItem> items = new ArrayList<>();
 
 	public LearningSection(long id, String name, String description, long sequence) {
 		this.name = name;
@@ -27,7 +27,7 @@ public class LearningSection {
 		return id;
 	}
 
-	public List<String> getItems() {
+	public List<LearningItem> getItems() {
 		return items;
 	}
 

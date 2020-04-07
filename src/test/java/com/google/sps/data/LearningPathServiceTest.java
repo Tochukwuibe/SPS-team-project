@@ -28,6 +28,10 @@ public class LearningPathServiceTest {
 		helper.tearDown();
 	}
 
+	private static LearningItem createLearningItem(String name, long sequence) {
+		return new LearningItem(name, 1, "description", sequence , "http://google.com", 0, 0);
+	}
+
 	@Test
 	public void testGetLearningPaths() {
 
@@ -42,14 +46,15 @@ public class LearningPathServiceTest {
 
 	@Test
 	public void saveComplexLearningPath() throws EntityNotFoundException {
+		long sequence = 0;
 		LearningSection html = new LearningSection(12, "HTML", "description", 0);
-		html.getItems().add("Item 1");
-		html.getItems().add("Item 2");
+		html.getItems().add(createLearningItem("Item 1", sequence++));
+		html.getItems().add(createLearningItem("Item 2", sequence++));
 
 		LearningSection css = new LearningSection(11, "CSS", "description", 1);
 		// TODO make items not just strings!
-		css.getItems().add("Item 3");
-		css.getItems().add("Item 4");
+		css.getItems().add(createLearningItem("Item 3", sequence++));
+		css.getItems().add(createLearningItem("Item 4", sequence++));
 
 		LearningPath path = new LearningPath(1, "Web Development", "description");
 		path.getSections().add(html);
@@ -65,13 +70,16 @@ public class LearningPathServiceTest {
 
 	@Test
 	public void updateLearningPath() throws EntityNotFoundException {
+
+		long sequence = 0;
+
 		LearningSection html = new LearningSection(12, "HTML", "description", 0);
-		html.getItems().add("Item 1");
-		html.getItems().add("Item 2");
+		html.getItems().add(createLearningItem("Item 1", sequence++));
+		html.getItems().add(createLearningItem("Item 2", sequence++));
 
 		LearningSection css = new LearningSection(11, "CSS", "description", 1);
-		css.getItems().add("Item 3");
-		css.getItems().add("Item 4");
+		css.getItems().add(createLearningItem("Item 3", sequence++));
+		css.getItems().add(createLearningItem("Item 4", sequence++));
 
 		LearningPath initial = new LearningPath(1, "Web Development", "description");
 		initial.getSections().add(css);
