@@ -31,10 +31,37 @@
     </dependency>
 
     <dependency>
+      <groupId>com.google.appengine</groupId>
+      <artifactId>appengine-api-labs</artifactId>
+      <version>1.9.59</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.appengine</groupId>
+      <artifactId>appengine-api-stubs</artifactId>
+      <version>1.9.59</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.appengine</groupId>
+      <artifactId>appengine-testing</artifactId>
+      <version>1.9.59</version>
+    </dependency>
+
+
+    <dependency>
       <!-- FreeMarker templating engine, for generating HTML content -->
       <groupId>org.freemarker</groupId>
       <artifactId>freemarker</artifactId>
       <version>2.3.30</version>
+    </dependency>
+
+
+
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.13</version>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>

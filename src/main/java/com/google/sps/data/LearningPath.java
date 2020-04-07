@@ -5,13 +5,15 @@ import java.util.List;
 
 public class LearningPath {
 
-	private String name;
-	private long id;
-	private List<LearningSection> sections = new ArrayList<>();
+	private final String name;
+	private final String description;
+	private final long id;
+	private final List<LearningSection> sections = new ArrayList<>();
 
-	public LearningPath(String name, long id) {
+	public LearningPath(long id, String name, String description) {
 		this.name = name;
 		this.id = id;
+		this.description = description;
 	}
 
 	public String getName() {

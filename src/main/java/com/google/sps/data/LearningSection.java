@@ -4,15 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LearningSection {
-	private String name;
-	private long id;
+	private final long id;
+	private final String name;
+	private final String description;
+	private final long sequence;
 
 	// Should not be Strings, just for example
 	private List<String> items = new ArrayList<>();
 
-	public LearningSection(String name, long id) {
+	public LearningSection(long id, String name, String description, long sequence) {
 		this.name = name;
+		this.description = description;
 		this.id = id;
+		this.sequence = sequence;
 	}
 
 	public String getName() {
@@ -25,5 +29,13 @@ public class LearningSection {
 
 	public List<String> getItems() {
 		return items;
+	}
+
+	public long getSequence() {
+		return sequence;
+	}
+
+	public String getDescription() {
+		return description;
 	}
 }
