@@ -1,10 +1,10 @@
 <#include "common/header.ftl">
 
+<#include "feedback.ftl">
+
 <div class="container">
         <h1>${path.name}</h1>
 
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Feedback</button></h2>
-    <#include "feedback.ftl">
     <#list path.sections as sec>
             <div class="section">
                     <h5>Section: ${sec.name}</h5>
@@ -41,6 +41,9 @@
                                         <p class="card-text">${item.description}</p>
                                         <a href="${item.url}/" class="btn btn-primary">Start Learning</a>
                                         <a href="#" class="btn btn-secondary">Done</a>
+                                        <button type="button" class="btn btn-primary"
+                                                onclick="initializeModal('111', '222', 'Item name')"
+                                                data-toggle="modal" data-target="#exampleModal">Feedback</button>
                                 </div>
                         </div>
                 </#list>

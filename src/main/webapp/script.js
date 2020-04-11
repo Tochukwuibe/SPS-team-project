@@ -13,5 +13,16 @@
 // limitations under the License.
 
 $('#myModal').on('shown.bs.modal', function () {
-  $('#myInput').trigger('focus')
-})
+    $('#myInput').trigger('focus')
+});
+
+function initializeModal(pathId, itemId, itemName) {
+    console.log("initializing", arguments)
+
+    $("#feedback-title").text(itemName);
+    const form = $("#feedback");
+}
+
+function submitFeedback() {
+  // TODO
+}
