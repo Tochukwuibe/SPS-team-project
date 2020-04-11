@@ -16,6 +16,7 @@ package com.google.sps.servlets;
 
 import com.google.sps.data.LearningPathService;
 import com.google.sps.data.User;
+import com.google.sps.data.UserService;
 import com.google.sps.html.HtmlRenderer;
 import com.google.sps.html.LandingPageModel;
 

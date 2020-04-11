@@ -1,5 +1,7 @@
 package com.google.sps.data;
 
+import com.google.appengine.api.datastore.Entity;
+
 public class LearningItem {
 
 	private final long id;
@@ -8,6 +10,8 @@ public class LearningItem {
 	private final String name;
 	private final String description;
 	private final String url;
+	private final long learningSection;
+	private final long learningPath;
 
 	private long ratingCount;
 	private long ratingTotal;
@@ -20,66 +24,96 @@ public class LearningItem {
 		this.url = url;
 		this.ratingCount = ratingCount;
 		this.ratingTotal = ratingTotal;
+		this.learningPath = 0;
+		this.learningSection = 0;
+	}
+
+	public LearningItem(Entity e) {
+		this.id = (long) e.getKey().getId();
+		this.learningSection = (long) e.getProperty("learningSection");
+		this.learningPath = (long) e.getProperty("learningPath");
+		this.name = (String) e.getProperty("name");
+		this.description = (String) e.getProperty("description");
+		this.sequence = (long) e.getProperty("sequence");
+		this.url = (String) e.getProperty("url");
+		this.ratingCount = ((Long) e.getProperty("ratingCount")).intValue();
+		this.ratingTotal = ((Long) e.getProperty("ratingTotal")).intValue();
+
 	}
 
 
-    public long getId() {
-        return id;
-    }
+	public long getId() {
+		return id;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public long getLearningSection() {
+		return learningSection;
+	}
 
-    public String getDescription() {
-        return description;
-    }
+	public long getLearningPath() {
+		return learningPath;
+	}
 
-    public String getUrl() {
-        return url;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public long getSequence() {
-        return sequence;
-    }
+	public String getDescription() {
+		return description;
+	}
 
-    public long getRatingCount() {
-        return ratingCount;
-    }
+	public String getUrl() {
+		return url;
+	}
+
+	public long getSequence() {
+		return sequence;
+	}
+
+	public long getRatingCount() {
+		return ratingCount;
+	}
+
+	public void setRatingCount(long ratingCount) {
+		this.ratingCount = ratingCount;
+	}
+
+	public void setRatingTotal(long ratingTotal) {
+		this.ratingTotal = ratingTotal;
+	}
 
 
-    public long getRatingTotal() {
-        return ratingTotal;
-    }
+	public long getRatingTotal() {
+		return ratingTotal;
+	}
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + (int) (id ^ (id >>> 32));
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        return result;
-    }
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (int) (id ^ (id >>> 32));
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        LearningItem other = (LearningItem) obj;
-        if (id != other.id)
-            return false;
-        if (name == null) {
-            if (other.name != null)
-                return false;
-        } else if (!name.equals(other.name))
-            return false;
-        return true;
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		LearningItem other = (LearningItem) obj;
+		if (id != other.id)
+			return false;
+		if (name == null) {
+			if (other.name != null)
+				return false;
+		} else if (!name.equals(other.name))
+			return false;
+		return true;
+	}
 
-    
 
 }

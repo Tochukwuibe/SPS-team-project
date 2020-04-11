@@ -29,12 +29,12 @@ public class LearningPathServiceTest {
 	}
 
 	private static LearningItem createLearningItem(String name, long sequence) {
-		return new LearningItem(name, 1, "description", sequence , "http://google.com", 0, 0);
+		return new LearningItem(name, sequence, "description", sequence,
+				"http://google.com/" + sequence, (int) sequence, (int) sequence);
 	}
 
 	@Test
 	public void testGetLearningPaths() {
-
 		LearningPathService svc = new LearningPathService();
 		svc.store(new LearningPath(1, "Path 1", "description"));
 		svc.store(new LearningPath(2, "Path 2", "description"));
@@ -46,13 +46,12 @@ public class LearningPathServiceTest {
 
 	@Test
 	public void saveComplexLearningPath() throws EntityNotFoundException {
-		long sequence = 0;
-		LearningSection html = new LearningSection(12, "HTML", "description", 0);
+		long sequence = 2;
+		LearningSection html = new LearningSection(12, "HTML", "Html description", 0);
 		html.getItems().add(createLearningItem("Item 1", sequence++));
 		html.getItems().add(createLearningItem("Item 2", sequence++));
 
-		LearningSection css = new LearningSection(11, "CSS", "description", 1);
-		// TODO make items not just strings!
+		LearningSection css = new LearningSection(11, "CSS", "Css description", 1);
 		css.getItems().add(createLearningItem("Item 3", sequence++));
 		css.getItems().add(createLearningItem("Item 4", sequence++));
 
@@ -70,8 +69,7 @@ public class LearningPathServiceTest {
 
 	@Test
 	public void updateLearningPath() throws EntityNotFoundException {
-
-		long sequence = 0;
+		long sequence = 1;
 
 		LearningSection html = new LearningSection(12, "HTML", "description", 0);
 		html.getItems().add(createLearningItem("Item 1", sequence++));
@@ -98,6 +96,7 @@ public class LearningPathServiceTest {
 
 	private static void assertSameLearningPath(LearningPath expected, LearningPath actual) {
 		assertEquals(expected.getName(), actual.getName());
+		assertEquals(expected.getDescription(), actual.getDescription());
 		assertEquals(expected.getId(), actual.getId());
 		assertEquals(expected.getSections().size(), actual.getSections().size());
 
@@ -109,6 +108,23 @@ public class LearningPathServiceTest {
 	private static void assertSameSection(LearningSection expected, LearningSection actual) {
 		assertEquals(expected.getId(), actual.getId());
 		assertEquals(expected.getName(), actual.getName());
-		// TODO check all items
+		assertEquals(expected.getDescription(), actual.getDescription());
+		assertEquals(expected.getSequence(), actual.getSequence());
+
+		assertEquals("Wrong item count in section " + expected.getName(),
+				expected.getItems().size(), actual.getItems().size());
+		for (int i = 0; i < expected.getItems().size(); i++) {
+			assertSameItem(expected.getItems().get(i), actual.getItems().get(i));
+		}
+	}
+
+	private static void assertSameItem(LearningItem expected, LearningItem actual) {
+		assertEquals("Wrong ID", expected.getId(), actual.getId());
+		assertEquals(expected.getName(), actual.getName());
+		assertEquals(expected.getDescription(), actual.getDescription());
+		assertEquals(expected.getSequence(), actual.getSequence());
+		assertEquals(expected.getRatingCount(), actual.getRatingCount());
+		assertEquals(expected.getRatingTotal(), actual.getRatingTotal());
+		assertEquals(expected.getUrl(), actual.getUrl());
 	}
 }

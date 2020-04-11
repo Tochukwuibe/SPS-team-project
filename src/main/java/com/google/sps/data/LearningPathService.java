@@ -10,6 +10,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.sps.html.LearningPathSummary;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,7 +44,7 @@ public class LearningPathService {
 
 		Entity task = new Entity(LEARNING_PATH, path.getId());
 		task.setProperty("name", path.getName());
-		Key taskKey = datastore.put(task);
+		datastore.put(task);
 
 		List<LearningSection> existing = loadSections(path.getId());
 
@@ -61,8 +62,37 @@ public class LearningPathService {
 		Entity task = new Entity(LEARNING_SECTION, section.getId());
 		task.setProperty("learningPath", path.getId());
 		task.setProperty("name", section.getName());
+		task.setProperty("description", section.getDescription());
 		task.setProperty("sequence", section.getSequence());
-		Key taskKey = datastore.put(task);
+		datastore.put(task);
+
+		List<LearningItem> existing = loadItems(section.getId());
+
+		// TODO optimize this to only delete no-longer present items
+		for (LearningItem ex : existing) {
+			datastore.delete(KeyFactory.createKey(LEARNING_ITEM, ex.getId()));
+		}
+
+		for (LearningItem item : section.getItems()) {
+			storeItem(item, section.getId(), path.getId());
+		}
+	}
+
+	private void storeItem(LearningItem item) {
+		storeItem(item, item.getLearningSection(), item.getLearningPath());
+	}
+
+	private void storeItem(LearningItem item, long learningSectionId, long learningPathId) {
+		Entity e = new Entity(LEARNING_ITEM, item.getId());
+		e.setProperty("learningPath", learningPathId);
+		e.setProperty("learningSection", learningSectionId);
+		e.setProperty("name", item.getName());
+		e.setProperty("description", item.getDescription());
+		e.setProperty("sequence", item.getSequence());
+		e.setProperty("url", item.getUrl());
+		e.setProperty("ratingCount", item.getRatingCount());
+		e.setProperty("ratingTotal", item.getRatingTotal());
+		datastore.put(e);
 	}
 
 	public LearningPath load(long id) throws EntityNotFoundException {
@@ -82,17 +112,13 @@ public class LearningPathService {
 
 		List<Entity> sections = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
 
-		return sections.stream().map(e -> mapEntityToLearningSection(e)).collect(Collectors.toList());
+		return sections.stream().map(this::mapEntityToLearningSection).collect(Collectors.toList());
 	}
 
 	private LearningSection mapEntityToLearningSection(Entity e) {
 		LearningSection section = new LearningSection(e.getKey().getId(), (String) e.getProperty("name"),
-				"description", (long) e.getProperty("sequence"));
-
-		List<LearningItem> items = loadItems(section.getId());
-
-		section.getItems().addAll(items);
-
+				(String) e.getProperty("description"), (long) e.getProperty("sequence"));
+		section.getItems().addAll(loadItems(section.getId()));
 		return section;
 	}
 
@@ -105,19 +131,80 @@ public class LearningPathService {
 		return items.stream().map(e -> mapEntityToLearningItem(id, e)).collect(Collectors.toList());
 	}
 
-	private LearningItem mapEntityToLearningItem(long id, Entity e) {
-		String name = (String) e.getProperty("name");
-		String description = (String) e.getProperty("description");
-		long sequence = (long) e.getProperty("sequence");
-		String url = (String) e.getProperty("url");
-		int ratingCount = (int) e.getProperty("ratingCount");
-		int ratingTotal = (int) e.getProperty("ratingTotal");
+	public LearningItem loadItem(long itemId) throws EntityNotFoundException {
+		Entity item = datastore.get(KeyFactory.createKey(LEARNING_ITEM, itemId));
+		return mapEntityToLearningItem(itemId, item);
+	}
 
-		return new LearningItem(name, id, description, sequence, url, ratingCount, ratingTotal);
+	private LearningItem mapEntityToLearningItem(long sectionId, Entity e) {
+		return new LearningItem(e);
 	}
 
 	// public void delete(long id) {
 	// Key taskKey = KeyFactory.createKey(kind, id);
 	// datastore.delete(taskKey);
 	// }
+
+	private static final String ITEM_FEEDBACK = "itemFeedback";
+
+	public ItemFeedback getOne(String userId, long learningItem) {
+
+		Query.CompositeFilter filter = new Query.CompositeFilter(
+				Query.CompositeFilterOperator.AND,
+				Arrays.asList(
+						new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId),
+						new Query.FilterPredicate("learningItem", Query.FilterOperator.EQUAL, learningItem)
+				)
+		);
+		Query query = new Query(ITEM_FEEDBACK).setFilter(filter);
+
+		List<Entity> result = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
+		if (result.isEmpty()) {
+			return null;
+		}
+
+		Entity feedback = result.get(0);
+		return new ItemFeedback(
+				feedback.getKey().getId(),
+				(long) feedback.getProperty("learningPath"),
+				(long) feedback.getProperty("learningItem"),
+				(String) feedback.getProperty("userId"),
+				((Long) feedback.getProperty("rating")).intValue(),
+				(boolean) feedback.getProperty("completed")
+		);
+	}
+
+	public LearningItem submitFeedback(long pathId, long learningItemId, String userId, int rating, boolean completed) throws EntityNotFoundException {
+		LearningItem item = loadItem(learningItemId);
+		// TODO warn if learning item is not found
+
+		long countDelta, ratingDelta;
+
+		ItemFeedback existing = getOne(userId, learningItemId);
+		if (existing == null) {
+			Entity feedback = new Entity(ITEM_FEEDBACK);
+			feedback.setProperty("learningPath", pathId);
+			feedback.setProperty("userId", userId);
+			feedback.setProperty("rating", rating);
+			feedback.setProperty("completed", completed);
+			feedback.setProperty("learningItem", learningItemId);
+			Key result = datastore.put(feedback);
+			System.out.printf("Stored user feedback as %s%n", result);
+			countDelta = 1;
+			ratingDelta = rating;
+		} else {
+			ratingDelta = rating - existing.getRating();
+			countDelta = 0;
+
+			existing.setRating(rating);
+			existing.setCompleted(completed);
+		}
+
+		item.setRatingCount(item.getRatingCount() + countDelta);
+		item.setRatingTotal(item.getRatingTotal() + ratingDelta);
+		storeItem(item);
+
+		return item;
+	}
+
 }

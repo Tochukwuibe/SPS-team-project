@@ -1,20 +1,24 @@
 package com.google.sps.data;
 
-public class ItemFeedback {
+public class ItemFeedback implements Json {
 
     private long id;
     private long learningPath;
     private long learningItem;
-    private long userId;
+    private String userId;
     private int rating;
     private boolean completed;
 
 
     public ItemFeedback (long id, long learningPath, long learningItem) {
-        this(id, learningPath, learningItem, 0, 0, false);
+        this(id, learningPath, learningItem, "", 0, false);
     }
 
-    public ItemFeedback (long id, long learningPath, long learningItem, long userId, int rating, boolean completed) {
+    public ItemFeedback (long learningPath, long learningItem, String userId, int rating, boolean completed) {
+        this(0, learningPath, learningItem, userId, rating, completed);
+    }
+
+    public ItemFeedback (long id, long learningPath, long learningItem, String userId, int rating, boolean completed) {
         this.id = id;
         this.learningPath = learningPath;
         this.learningItem = learningItem;
@@ -31,11 +35,11 @@ public class ItemFeedback {
         return learningPath;
     }
 
-    public long getLeanrningItem() {
+    public long getLearningItem() {
         return learningItem;
     }
 
-    public long getUserId() {
+    public String getUserId() {
         return userId;
     }
 
@@ -47,4 +51,11 @@ public class ItemFeedback {
         return completed;
     }
 
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
 }
