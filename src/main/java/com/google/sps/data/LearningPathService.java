@@ -10,6 +10,7 @@ import com.google.appengine.api.datastore.KeyFactory;
 import com.google.appengine.api.datastore.Query;
 import com.google.sps.html.LearningPathSummary;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,7 +20,6 @@ public class LearningPathService {
 	private static final String LEARNING_SECTION = "LearningSection";
 	private static final String LEARNING_ITEM = "LearningItem";
 
-	private final ItemFeedbackService itemFeedbackService = new ItemFeedbackService();
 	private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 	public LearningPathService() {
@@ -74,14 +74,18 @@ public class LearningPathService {
 		}
 
 		for (LearningItem item : section.getItems()) {
-			storeItem(item, section, path);
+			storeItem(item, section.getId(), path.getId());
 		}
 	}
 
-	private void storeItem(LearningItem item, LearningSection section, LearningPath path) {
+	private void storeItem(LearningItem item) {
+		storeItem(item, item.getLearningSection(), item.getLearningPath());
+	}
+
+	private void storeItem(LearningItem item, long learningSectionId, long learningPathId) {
 		Entity e = new Entity(LEARNING_ITEM, item.getId());
-		e.setProperty("learningPath", path.getId());
-		e.setProperty("learningSection", section.getId());
+		e.setProperty("learningPath", learningPathId);
+		e.setProperty("learningSection", learningSectionId);
 		e.setProperty("name", item.getName());
 		e.setProperty("description", item.getDescription());
 		e.setProperty("sequence", item.getSequence());
@@ -100,37 +104,6 @@ public class LearningPathService {
 		LearningPath result = new LearningPath(path.getKey().getId(), name, "description");
 		result.getSections().addAll(sections);
 		return result;
-	}
-
-	public LearningPath updateRating(long pathId, ItemFeedback feedback) throws EntityNotFoundException {
-
-		LearningPath path = load(pathId);
-		ItemFeedback existing_feedback = itemFeedbackService.getOne(feedback.getUserId(), pathId);
-
-		double rating_diff = feedback.getRating();
-		int total_rating_diff = 1;
-
-		if (existing_feedback != null) {
-			/*
-				is the user already gave feedback, no need ot increase the
-				rating total, and the rating diff is the current rating value
-				minus the existing feedback value
-			*/
-			total_rating_diff = 0;
-			rating_diff = feedback.getRating() - existing_feedback.getRating();
-
-		}
-
-		// new average rating = (current_average * total ratings) + the current_rating_diff  / the new total ratigns
-		double new_average_rating = ((path.getAverageRating() * path.getNumberOfRatings()) + rating_diff) / (path.getNumberOfRatings() + total_rating_diff);
-
-		path.setAverageRating(new_average_rating);
-		path.setNumberOfRatings(path.getNumberOfRatings() + total_rating_diff);
-
-		this.store(path);
-
-		return path;
-
 	}
 
 	private List<LearningSection> loadSections(long id) {
@@ -164,19 +137,74 @@ public class LearningPathService {
 	}
 
 	private LearningItem mapEntityToLearningItem(long sectionId, Entity e) {
-		long itemId = (long) e.getKey().getId();
-		String name = (String) e.getProperty("name");
-		String description = (String) e.getProperty("description");
-		long sequence = (long) e.getProperty("sequence");
-		String url = (String) e.getProperty("url");
-		int ratingCount = ((Long) e.getProperty("ratingCount")).intValue();
-		int ratingTotal = ((Long) e.getProperty("ratingTotal")).intValue();
-
-		return new LearningItem(name, itemId, description, sequence, url, ratingCount, ratingTotal);
+		return new LearningItem(e);
 	}
 
 	// public void delete(long id) {
 	// Key taskKey = KeyFactory.createKey(kind, id);
 	// datastore.delete(taskKey);
 	// }
+
+	private static final String ITEM_FEEDBACK = "itemFeedback";
+
+	public ItemFeedback getOne(String userId, long learningItem) {
+
+		Query.CompositeFilter filter = new Query.CompositeFilter(
+				Query.CompositeFilterOperator.AND,
+				Arrays.asList(
+						new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId),
+						new Query.FilterPredicate("learningItem", Query.FilterOperator.EQUAL, learningItem)
+				)
+		);
+		Query query = new Query(ITEM_FEEDBACK).setFilter(filter);
+
+		List<Entity> result = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
+		if (result.isEmpty()) {
+			return null;
+		}
+
+		Entity feedback = result.get(0);
+		return new ItemFeedback(
+				feedback.getKey().getId(),
+				(long) feedback.getProperty("learningPath"),
+				(long) feedback.getProperty("learningItem"),
+				(String) feedback.getProperty("userId"),
+				((Long) feedback.getProperty("rating")).intValue(),
+				(boolean) feedback.getProperty("completed")
+		);
+	}
+
+	public LearningItem submitFeedback(long pathId, long learningItemId, String userId, int rating, boolean completed) throws EntityNotFoundException {
+		LearningItem item = loadItem(learningItemId);
+		// TODO warn if learning item is not found
+
+		long countDelta, ratingDelta;
+
+		ItemFeedback existing = getOne(userId, learningItemId);
+		if (existing == null) {
+			Entity feedback = new Entity(ITEM_FEEDBACK);
+			feedback.setProperty("learningPath", pathId);
+			feedback.setProperty("userId", userId);
+			feedback.setProperty("rating", rating);
+			feedback.setProperty("completed", completed);
+			feedback.setProperty("learningItem", learningItemId);
+			Key result = datastore.put(feedback);
+			System.out.printf("Stored user feedback as %s%n", result);
+			countDelta = 1;
+			ratingDelta = rating;
+		} else {
+			ratingDelta = rating - existing.getRating();
+			countDelta = 0;
+
+			existing.setRating(rating);
+			existing.setCompleted(completed);
+		}
+
+		item.setRatingCount(item.getRatingCount() + countDelta);
+		item.setRatingTotal(item.getRatingTotal() + ratingDelta);
+		storeItem(item);
+
+		return item;
+	}
+
 }

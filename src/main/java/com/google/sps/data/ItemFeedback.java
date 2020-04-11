@@ -35,7 +35,7 @@ public class ItemFeedback implements Json {
         return learningPath;
     }
 
-    public long getLeanrningItem() {
+    public long getLearningItem() {
         return learningItem;
     }
 
@@ -51,4 +51,11 @@ public class ItemFeedback implements Json {
         return completed;
     }
 
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
 }
