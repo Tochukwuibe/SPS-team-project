@@ -1,8 +1,10 @@
 <#include "common/header.ftl">
 
 <div class="container">
-        <h3>${path.name}</h3>
+        <h1>${path.name}</h1>
 
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Feedback</button></h2>
+    <#include "feedback.ftl">
     <#list path.sections as sec>
             <div class="section">
                     <h5>Section: ${sec.name}</h5>
