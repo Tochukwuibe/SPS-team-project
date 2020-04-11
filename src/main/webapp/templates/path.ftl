@@ -5,10 +5,13 @@
 
     <#list path.sections as sec>
             <div>
-                    <h2>Section: ${sec.name}</h2>
+                    <h2>Section: ${sec.name} <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Feedback</button></h2>
+                    <#include "feedback.ftl">
+
                     <ul>
+                        <li>oi</li>
                         <#list sec.items as item>
-                                <li>${item}</li>
+                                <li>${item.name}</li>
                         </#list>
                     </ul>
             </div>
