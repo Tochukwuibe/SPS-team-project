@@ -27,4 +27,8 @@ public class LearningPath {
 	public List<LearningSection> getSections() {
 		return sections;
 	}
+
+	public String getDescription() {
+		return description;
+	}
 }
