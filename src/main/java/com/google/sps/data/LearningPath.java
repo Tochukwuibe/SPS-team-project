@@ -8,12 +8,22 @@ public class LearningPath {
 	private final String name;
 	private final String description;
 	private final long id;
+	private double averageRating;
+	private int numberOfRatings;
 	private final List<LearningSection> sections = new ArrayList<>();
 
+
 	public LearningPath(long id, String name, String description) {
+		this(id, name, description, 0, 0);
+	}
+
+
+	public LearningPath(long id, String name, String description, double averageRating, int numberOfRatings) {
 		this.name = name;
 		this.id = id;
 		this.description = description;
+		this.averageRating = averageRating;
+		this.numberOfRatings = numberOfRatings;
 	}
 
 	public String getName() {
@@ -27,4 +37,28 @@ public class LearningPath {
 	public List<LearningSection> getSections() {
 		return sections;
 	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public double getAverageRating() {
+		return averageRating;
+	}
+
+	public void setAverageRating(double averageRating) {
+		this.averageRating = averageRating;
+	}
+
+
+	public int getNumberOfRatings() {
+		return numberOfRatings;
+	}
+
+	public void setNumberOfRatings(int numberOfRatings) {
+	  this.numberOfRatings = numberOfRatings;
+	}
+
+
+	
 }

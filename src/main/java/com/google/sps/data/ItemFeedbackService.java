@@ -40,7 +40,7 @@ public class ItemFeedbackService {
             e.getKey().getId(), 
             (long) e.getProperty("learningPath"),
             (long) e.getProperty("leanrningItem"),
-            (long) e.getProperty("userId"),
+            (String) e.getProperty("userId"),
             (int) e.getProperty("rating"),
             (boolean) e.getProperty("completed")
         )).collect(Collectors.toList());
@@ -55,13 +55,13 @@ public class ItemFeedbackService {
             task.getKey().getId(), 
             (long) task.getProperty("learningPath"),
             (long) task.getProperty("leanrningItem"),
-            (long) task.getProperty("userId"),
+            (String) task.getProperty("userId"),
             (int) task.getProperty("rating"),
             (boolean) task.getProperty("completed")
         );
     }
 
-    public ItemFeedback getOne(long userId, long learningPath) {
+    public ItemFeedback getOne(String userId, long learningPath) {
 
         Query query = new Query(ITEM_FEEDBACK)
         .setFilter(new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userId))
@@ -75,7 +75,7 @@ public class ItemFeedbackService {
             feedback.getKey().getId(), 
             (long) feedback.getProperty("learningPath"),
             (long) feedback.getProperty("leanrningItem"),
-            (long) feedback.getProperty("userId"),
+            (String) feedback.getProperty("userId"),
             (int) feedback.getProperty("rating"),
             (boolean) feedback.getProperty("completed")
         );
@@ -93,7 +93,7 @@ public class ItemFeedbackService {
         task.setProperty("completed", feedback.isCompleted());
         task.setProperty("learningItem", feedback.getLeanrningItem());
 
-        Key taskKey = datastore.put(task);
+        datastore.put(task);
     }
 
 }

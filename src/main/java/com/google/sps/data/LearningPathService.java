@@ -19,6 +19,7 @@ public class LearningPathService {
 	private static final String LEARNING_SECTION = "LearningSection";
 	private static final String LEARNING_ITEM = "LearningItem";
 
+	private final ItemFeedbackService itemFeedbackService = new ItemFeedbackService();
 	private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 	public LearningPathService() {
@@ -76,6 +77,37 @@ public class LearningPathService {
 		return result;
 	}
 
+	public LearningPath updateRating(long pathId, ItemFeedback feedback) throws EntityNotFoundException {
+		
+		LearningPath path = load(pathId);
+		ItemFeedback existing_feedback = itemFeedbackService.getOne(feedback.getUserId(), pathId);
+
+		double rating_diff = feedback.getRating();
+		int total_rating_diff = 1;
+
+		if(existing_feedback != null) {
+			/*	
+				is the user already gave feedback, no need ot increase the 
+				rating total, and the rating diff is the current rating value
+				minus the existing feedback value
+			*/
+			total_rating_diff = 0;
+			rating_diff = feedback.getRating() - existing_feedback.getRating();
+
+		}
+
+		// new average rating = (current_average * total ratings) + the current_rating_diff  / the new total ratigns
+		double new_average_rating = ((path.getAverageRating() * path.getNumberOfRatings()) + rating_diff) / (path.getNumberOfRatings() + total_rating_diff);
+
+		path.setAverageRating(new_average_rating);
+		path.setNumberOfRatings(path.getNumberOfRatings() + total_rating_diff);
+
+		this.store(path);
+
+		return path;
+		
+	}
+
 	private List<LearningSection> loadSections(long id) {
 		Query query = new Query(LEARNING_SECTION).addSort("sequence")
 				.setFilter(new Query.FilterPredicate("learningPath", Query.FilterOperator.EQUAL, id));
@@ -86,8 +118,8 @@ public class LearningPathService {
 	}
 
 	private LearningSection mapEntityToLearningSection(Entity e) {
-		LearningSection section = new LearningSection(e.getKey().getId(), (String) e.getProperty("name"),
-				"description", (long) e.getProperty("sequence"));
+		LearningSection section = new LearningSection(e.getKey().getId(), (String) e.getProperty("name"), "description",
+				(long) e.getProperty("sequence"));
 
 		List<LearningItem> items = loadItems(section.getId());
 
