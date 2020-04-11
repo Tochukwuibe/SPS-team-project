@@ -61,6 +61,7 @@ public class LearningPathService {
 		Entity task = new Entity(LEARNING_SECTION, section.getId());
 		task.setProperty("learningPath", path.getId());
 		task.setProperty("name", section.getName());
+		task.setProperty("description", section.getDescription());
 		task.setProperty("sequence", section.getSequence());
 		datastore.put(task);
 
@@ -111,7 +112,7 @@ public class LearningPathService {
 
 	private LearningSection mapEntityToLearningSection(Entity e) {
 		LearningSection section = new LearningSection(e.getKey().getId(), (String) e.getProperty("name"),
-				"description", (long) e.getProperty("sequence"));
+				(String) e.getProperty("description"), (long) e.getProperty("sequence"));
 		section.getItems().addAll(loadItems(section.getId()));
 		return section;
 	}

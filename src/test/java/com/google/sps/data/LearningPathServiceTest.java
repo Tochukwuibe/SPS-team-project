@@ -48,11 +48,11 @@ public class LearningPathServiceTest {
 	@Test
 	public void saveComplexLearningPath() throws EntityNotFoundException {
 		long sequence = 2;
-		LearningSection html = new LearningSection(12, "HTML", "description", 0);
+		LearningSection html = new LearningSection(12, "HTML", "Html description", 0);
 		html.getItems().add(createLearningItem("Item 1", sequence++));
 		html.getItems().add(createLearningItem("Item 2", sequence++));
 
-		LearningSection css = new LearningSection(11, "CSS", "description", 1);
+		LearningSection css = new LearningSection(11, "CSS", "Css description", 1);
 		css.getItems().add(createLearningItem("Item 3", sequence++));
 		css.getItems().add(createLearningItem("Item 4", sequence++));
 
