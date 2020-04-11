@@ -43,7 +43,7 @@ public class LearningPathService {
 
 		Entity task = new Entity(LEARNING_PATH, path.getId());
 		task.setProperty("name", path.getName());
-		Key taskKey = datastore.put(task);
+		datastore.put(task);
 
 		List<LearningSection> existing = loadSections(path.getId());
 
@@ -62,7 +62,31 @@ public class LearningPathService {
 		task.setProperty("learningPath", path.getId());
 		task.setProperty("name", section.getName());
 		task.setProperty("sequence", section.getSequence());
-		Key taskKey = datastore.put(task);
+		datastore.put(task);
+
+		List<LearningItem> existing = loadItems(section.getId());
+
+		// TODO optimize this to only delete no-longer present items
+		for (LearningItem ex : existing) {
+			datastore.delete(KeyFactory.createKey(LEARNING_ITEM, ex.getId()));
+		}
+
+		for (LearningItem item : section.getItems()) {
+			storeItem(item, section, path);
+		}
+	}
+
+	private void storeItem(LearningItem item, LearningSection section, LearningPath path) {
+		Entity e = new Entity(LEARNING_ITEM, item.getId());
+		e.setProperty("learningPath", path.getId());
+		e.setProperty("learningSection", section.getId());
+		e.setProperty("name", item.getName());
+		e.setProperty("description", item.getDescription());
+		e.setProperty("sequence", item.getSequence());
+		e.setProperty("url", item.getUrl());
+		e.setProperty("ratingCount", item.getRatingCount());
+		e.setProperty("ratingTotal", item.getRatingTotal());
+		datastore.put(e);
 	}
 
 	public LearningPath load(long id) throws EntityNotFoundException {
@@ -82,17 +106,13 @@ public class LearningPathService {
 
 		List<Entity> sections = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
 
-		return sections.stream().map(e -> mapEntityToLearningSection(e)).collect(Collectors.toList());
+		return sections.stream().map(this::mapEntityToLearningSection).collect(Collectors.toList());
 	}
 
 	private LearningSection mapEntityToLearningSection(Entity e) {
 		LearningSection section = new LearningSection(e.getKey().getId(), (String) e.getProperty("name"),
 				"description", (long) e.getProperty("sequence"));
-
-		List<LearningItem> items = loadItems(section.getId());
-
-		section.getItems().addAll(items);
-
+		section.getItems().addAll(loadItems(section.getId()));
 		return section;
 	}
 
@@ -105,15 +125,16 @@ public class LearningPathService {
 		return items.stream().map(e -> mapEntityToLearningItem(id, e)).collect(Collectors.toList());
 	}
 
-	private LearningItem mapEntityToLearningItem(long id, Entity e) {
+	private LearningItem mapEntityToLearningItem(long sectionId, Entity e) {
+		long itemId = (long) e.getKey().getId();
 		String name = (String) e.getProperty("name");
 		String description = (String) e.getProperty("description");
 		long sequence = (long) e.getProperty("sequence");
 		String url = (String) e.getProperty("url");
-		int ratingCount = (int) e.getProperty("ratingCount");
-		int ratingTotal = (int) e.getProperty("ratingTotal");
+		int ratingCount = ((Long) e.getProperty("ratingCount")).intValue();
+		int ratingTotal = ((Long) e.getProperty("ratingTotal")).intValue();
 
-		return new LearningItem(name, id, description, sequence, url, ratingCount, ratingTotal);
+		return new LearningItem(name, itemId, description, sequence, url, ratingCount, ratingTotal);
 	}
 
 	// public void delete(long id) {

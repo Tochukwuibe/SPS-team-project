@@ -47,7 +47,7 @@ public class LearningPathServiceTest {
 
 	@Test
 	public void saveComplexLearningPath() throws EntityNotFoundException {
-		long sequence = 0;
+		long sequence = 2;
 		LearningSection html = new LearningSection(12, "HTML", "description", 0);
 		html.getItems().add(createLearningItem("Item 1", sequence++));
 		html.getItems().add(createLearningItem("Item 2", sequence++));
@@ -70,8 +70,7 @@ public class LearningPathServiceTest {
 
 	@Test
 	public void updateLearningPath() throws EntityNotFoundException {
-
-		long sequence = 0;
+		long sequence = 1;
 
 		LearningSection html = new LearningSection(12, "HTML", "description", 0);
 		html.getItems().add(createLearningItem("Item 1", sequence++));
@@ -121,7 +120,7 @@ public class LearningPathServiceTest {
 	}
 
 	private static void assertSameItem(LearningItem expected, LearningItem actual) {
-		assertEquals(expected.getId(), actual.getId());
+		assertEquals("Wrong ID", expected.getId(), actual.getId());
 		assertEquals(expected.getName(), actual.getName());
 		assertEquals(expected.getDescription(), actual.getDescription());
 		assertEquals(expected.getSequence(), actual.getSequence());
