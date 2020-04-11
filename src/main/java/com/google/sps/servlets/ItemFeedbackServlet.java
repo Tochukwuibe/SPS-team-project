@@ -1,5 +1,7 @@
 package com.google.sps.servlets;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +25,17 @@ import java.io.IOException;
 @WebServlet({"/learning-path/*"})
 public class ItemFeedbackServlet extends HttpServlet {
 
+  private ItemFeedbackService itemFeedbackService;
+  private LearningPathService  learningPathService;
+
+  @Override
+	public void init(ServletConfig config) throws ServletException {
+		super.init(config);
+		itemFeedbackService = new ItemFeedbackService();
+    learningPathService = new LearningPathService();
+	}
+
+
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
@@ -41,8 +54,6 @@ public class ItemFeedbackServlet extends HttpServlet {
       long PathId = Long.parseLong(parts[1]);
       long ItemId = Long.parseLong(parts[3]);
 
-      ItemFeedbackService itemFeedbackService = new ItemFeedbackService();
-
       try {
 
         boolean completed = Boolean.parseBoolean(request.getParameter("completed"));
@@ -51,7 +62,6 @@ public class ItemFeedbackServlet extends HttpServlet {
         ItemFeedback feedback = new ItemFeedback(PathId, ItemId, user.getId(), rating, completed);
         itemFeedbackService.store(feedback);
 
-        LearningPathService  learningPathService = new LearningPathService();
         LearningPath path = learningPathService.updateRating(PathId, feedback);
         
         // anonymous class
@@ -69,7 +79,6 @@ public class ItemFeedbackServlet extends HttpServlet {
           System.out.printf("Error: learning path %d not found ", PathId);
           response.sendError(404);
       }
-
 
   
     }
