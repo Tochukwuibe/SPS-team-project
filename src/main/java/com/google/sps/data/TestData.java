@@ -9,6 +9,7 @@ public class TestData {
 		TestData td = new TestData();
 		List<LearningPath> content = td.generateContent();
 		for (LearningPath learningPath : content) {
+			System.out.println("Setting up content: " + learningPath.getName());
 			service.store(learningPath);
 		}
 	}
