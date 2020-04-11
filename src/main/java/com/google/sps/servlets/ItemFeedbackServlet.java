@@ -33,14 +33,11 @@ public class ItemFeedbackServlet extends HttpServlet {
 
 	@Override
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
 		// TODO add lots of validations
 
 		response.setContentType("application/json");
 
 		User user = UserService.getUser();
-		System.out.println(request.getPathInfo());
-		// TODO figure out which path to load, based on the ID
 		String[] parts = request.getPathInfo().split("/");
 
 		if (parts.length != 4) {
@@ -72,9 +69,5 @@ public class ItemFeedbackServlet extends HttpServlet {
 			System.out.printf("Error: learning path %d not found ", pathId);
 			response.sendError(404);
 		}
-
-
 	}
-
-
 }
