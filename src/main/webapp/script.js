@@ -11,3 +11,18 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+
+$('#myModal').on('shown.bs.modal', function () {
+    $('#myInput').trigger('focus')
+});
+
+function initializeModal(pathId, itemId, itemName) {
+    console.log("initializing", arguments)
+
+    $("#feedback-title").text(itemName);
+    const form = $("#feedback");
+}
+
+function submitFeedback() {
+  // TODO
+}
