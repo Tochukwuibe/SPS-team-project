@@ -1,20 +1,52 @@
 package com.google.sps.data;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.appengine.api.datastore.FetchOptions;
-import com.google.appengine.api.datastore.Key;
 import com.google.appengine.api.datastore.Query;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ItemFeedbackService {
 
     private static final String ITEM_FEEDBACK = "itemFeedback";
 
     private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+//    private final LearningPathService learningPathService = new LearningPathService();
+
+
+    public LearningPath updateRating(long pathId, ItemFeedback feedback) throws EntityNotFoundException {
+//        LearningPath path = learningPathService.load(pathId);
+        ItemFeedback existing_feedback = getOne(feedback.getUserId(), pathId);
+
+        double rating_diff = feedback.getRating();
+        int total_rating_diff = 1;
+
+        if(existing_feedback != null) {
+			/*
+				is the user already gave feedback, no need ot increase the
+				rating total, and the rating diff is the current rating value
+				minus the existing feedback value
+			*/
+            total_rating_diff = 0;
+            rating_diff = feedback.getRating() - existing_feedback.getRating();
+
+        }
+
+        // new average rating = (current_average * total ratings) + the current_rating_diff  / the new total ratigns
+//        double new_average_rating = ((path.getAverageRating() * path.getNumberOfRatings()) + rating_diff) / (path.getNumberOfRatings() + total_rating_diff);
+//
+//        path.setAverageRating(new_average_rating);
+//        path.setNumberOfRatings(path.getNumberOfRatings() + total_rating_diff);
+//
+//        learningPathService.store(path);
+//
+//        return path;
+        return null;
+    }
 
     public List<ItemFeedback> findByLearningPath(long learningPathId) {
 
@@ -96,4 +128,7 @@ public class ItemFeedbackService {
         datastore.put(task);
     }
 
+    public void submitFeedback(long pathId, long item1Id, String userId, int rating, boolean completed) {
+
+    }
 }

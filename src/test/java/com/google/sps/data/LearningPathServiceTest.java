@@ -28,13 +28,12 @@ public class LearningPathServiceTest {
 		helper.tearDown();
 	}
 
-	private static LearningItem createLearningItem(String name, long sequence) {
-		return new LearningItem(name, 1, "description", sequence , "http://google.com", 0, 0);
+	protected static LearningItem createLearningItem(String name, long id) {
+		return new LearningItem(name, id, "description", id, "http://google.com", 0, 0);
 	}
 
 	@Test
 	public void testGetLearningPaths() {
-
 		LearningPathService svc = new LearningPathService();
 		svc.store(new LearningPath(1, "Path 1", "description"));
 		svc.store(new LearningPath(2, "Path 2", "description"));

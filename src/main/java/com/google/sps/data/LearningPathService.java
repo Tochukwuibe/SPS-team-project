@@ -78,14 +78,14 @@ public class LearningPathService {
 	}
 
 	public LearningPath updateRating(long pathId, ItemFeedback feedback) throws EntityNotFoundException {
-		
+
 		LearningPath path = load(pathId);
 		ItemFeedback existing_feedback = itemFeedbackService.getOne(feedback.getUserId(), pathId);
 
 		double rating_diff = feedback.getRating();
 		int total_rating_diff = 1;
 
-		if(existing_feedback != null) {
+		if (existing_feedback != null) {
 			/*	
 				is the user already gave feedback, no need ot increase the 
 				rating total, and the rating diff is the current rating value
@@ -105,7 +105,7 @@ public class LearningPathService {
 		this.store(path);
 
 		return path;
-		
+
 	}
 
 	private List<LearningSection> loadSections(long id) {
@@ -135,6 +135,11 @@ public class LearningPathService {
 		List<Entity> items = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
 
 		return items.stream().map(e -> mapEntityToLearningItem(id, e)).collect(Collectors.toList());
+	}
+
+	public LearningItem loadItem(long itemId) throws EntityNotFoundException {
+		Entity item = datastore.get(KeyFactory.createKey(LEARNING_ITEM, itemId));
+		return mapEntityToLearningItem(itemId, item);
 	}
 
 	private LearningItem mapEntityToLearningItem(long id, Entity e) {

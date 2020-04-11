@@ -39,6 +39,8 @@ public class ItemFeedbackServlet extends HttpServlet {
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
+      // TODO add lots of validations
+
       response.setContentType("application/json");
 
       User user =  UserService.getUser();;
@@ -51,7 +53,7 @@ public class ItemFeedbackServlet extends HttpServlet {
           throw new IllegalStateException(request.getPathInfo());
       }
 
-      long PathId = Long.parseLong(parts[1]);
+      long pathId = Long.parseLong(parts[1]);
       long ItemId = Long.parseLong(parts[3]);
 
       try {
@@ -59,10 +61,10 @@ public class ItemFeedbackServlet extends HttpServlet {
         boolean completed = Boolean.parseBoolean(request.getParameter("completed"));
         int rating = Integer.parseInt(request.getParameter("rating"));
 
-        ItemFeedback feedback = new ItemFeedback(PathId, ItemId, user.getId(), rating, completed);
+        ItemFeedback feedback = new ItemFeedback(pathId, ItemId, user.getId(), rating, completed);
         itemFeedbackService.store(feedback);
 
-        LearningPath path = learningPathService.updateRating(PathId, feedback);
+        LearningPath path = learningPathService.updateRating(pathId, feedback);
         
         // anonymous class
         Json res = new Json() {
@@ -70,13 +72,13 @@ public class ItemFeedbackServlet extends HttpServlet {
             int numberOfRatings = path.getNumberOfRatings();
             boolean done = true;
             long itemId = ItemId;
-            long learningPath = PathId;
+            long learningPath = pathId;
         };
 
         response.getWriter().println(res.toJson());
         
       } catch (EntityNotFoundException e) {
-          System.out.printf("Error: learning path %d not found ", PathId);
+          System.out.printf("Error: learning path %d not found ", pathId);
           response.sendError(404);
       }
 
