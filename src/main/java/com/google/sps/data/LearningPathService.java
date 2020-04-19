@@ -19,6 +19,7 @@ public class LearningPathService {
 	private static final String LEARNING_PATH = "LearningPath";
 	private static final String LEARNING_SECTION = "LearningSection";
 	private static final String LEARNING_ITEM = "LearningItem";
+    private static final String ITEM_FEEDBACK = "ItemFeedback";
 
 	private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
@@ -95,6 +96,21 @@ public class LearningPathService {
 		datastore.put(e);
 	}
 
+    private void storeFeedback(ItemFeedback feedback) {
+		storeFeedback(feedback, feedback.getLearningItem(), feedback.getLearningPath());
+	}
+
+	private void storeFeedback(ItemFeedback item, long learningItemId, long learningPathId) {
+		Entity e = new Entity(ITEM_FEEDBACK, item.getId());
+		e.setProperty("learningPath", learningPathId);
+		e.setProperty("learningItem", learningItemId);
+		e.setProperty("userId", item.getUserId());
+		e.setProperty("rating", item.getRating());
+		e.setProperty("completed", item.isCompleted());
+        e.setProperty("id", item.getId());
+		datastore.put(e);
+	}
+
 	public LearningPath load(long id) throws EntityNotFoundException {
 		Entity path = datastore.get(KeyFactory.createKey(LEARNING_PATH, id));
 		String name = (String) path.getProperty("name");
@@ -136,16 +152,73 @@ public class LearningPathService {
 		return mapEntityToLearningItem(itemId, item);
 	}
 
-	private LearningItem mapEntityToLearningItem(long sectionId, Entity e) {
+    public LearningItem loadFeedbackItems(long itemId) throws EntityNotFoundException {
+		Entity item = datastore.get(KeyFactory.createKey(LEARNING_ITEM, itemId));
+		return mapEntityToLearningItem(itemId, item);
+	}
+    private LearningItem mapEntityToLearningItem(long sectionId, Entity e) {
 		return new LearningItem(e);
 	}
+
+    public List<ItemFeedback> loadItemFeedbacks(long learningPathId) throws EntityNotFoundException {
+		Query query = new Query(ITEM_FEEDBACK).addSort("id")
+				.setFilter(new Query.FilterPredicate("learningPath", Query.FilterOperator.EQUAL, learningPathId));
+
+		List<Entity> items = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
+
+		return items.stream().map(e -> mapEntityToItemFeedback(learningPathId, e)).collect(Collectors.toList());
+	}
+
+    public List<ItemFeedback> loadItemFeedbacksUser(long userID) throws EntityNotFoundException {
+		Query query = new Query(ITEM_FEEDBACK).addSort("id")
+			.setFilter(new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userID));
+
+		List<Entity> items = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
+
+		return items.stream().map(e -> mapEntityToItemFeedback(userID, e)).collect(Collectors.toList());
+	}
+
+    private ItemFeedback mapEntityToItemFeedback(long sectionId, Entity e) {
+		return new ItemFeedback(e);
+	}
+
+
+    public long getSectionCompletion(long userId, long sectionId ,long learningPath)throws EntityNotFoundException { 
+       // filter 
+        List<ItemFeedback> feedbacks = loadItemFeedbacksUser(userId).stream()
+                                    .filter( f -> f.isCompleted()).collect(Collectors.toList());
+        List<LearningItem> itemsInSection = loadItems(sectionId);
+
+        List<Long> feedbackId = feedbacks.stream().map(p -> p.getLearningItem())
+                                .collect(Collectors.toList()); 
+
+        List<Long> sectionIds = itemsInSection.stream().map(p -> p.getId())
+                                .collect(Collectors.toList()); 
+       
+        feedbackId.retainAll(sectionIds);
+
+        long proportion = feedbackId.size()/itemsInSection.size();
+       
+        return proportion;
+    }
+
+    public long getLearningPathCompletion(long userId, long learningPathId)throws EntityNotFoundException {
+        LearningPath path = load(learningPathId);
+        List<LearningSection> sections = path.getSections();
+        long completion = 0;
+
+        for ( LearningSection s : sections){
+            completion += getSectionCompletion(userId,s.getId(), learningPathId);
+        }
+
+        return (completion / sections.size());
+    }
 
 	// public void delete(long id) {
 	// Key taskKey = KeyFactory.createKey(kind, id);
 	// datastore.delete(taskKey);
 	// }
 
-	private static final String ITEM_FEEDBACK = "itemFeedback";
 
 	public ItemFeedback getOne(String userId, long learningItem) {
 

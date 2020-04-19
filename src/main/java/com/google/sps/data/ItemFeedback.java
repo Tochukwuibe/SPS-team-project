@@ -1,5 +1,5 @@
 package com.google.sps.data;
-
+import com.google.appengine.api.datastore.Entity;
 public class ItemFeedback implements Json {
 
     private long id;
@@ -26,6 +26,15 @@ public class ItemFeedback implements Json {
         this.rating = rating;
         this.completed = completed;
     }
+
+    public ItemFeedback(Entity e) {
+		this.id = (long) e.getKey().getId();
+		this.learningPath = (long) e.getProperty("learningPath");
+        this.learningItem = (long) e.getProperty("learningItem");
+		this.userId = (String) e.getProperty("userId");
+		this.rating = (int) e.getProperty("rating");
+		this.completed = (boolean) e.getProperty("complete");
+	}
 
     public long getId() {
         return id;
