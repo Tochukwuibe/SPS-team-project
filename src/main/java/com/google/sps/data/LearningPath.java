@@ -11,6 +11,7 @@ public class LearningPath {
 	private double averageRating;
 	private int numberOfRatings;
 	private final List<LearningSection> sections = new ArrayList<>();
+    private double completion;
 
 
 	public LearningPath(long id, String name, String description) {
@@ -24,6 +25,7 @@ public class LearningPath {
 		this.description = description;
 		this.averageRating = averageRating;
 		this.numberOfRatings = numberOfRatings;
+        this.completion = 0;
 	}
 
 	public String getName() {
@@ -58,6 +60,13 @@ public class LearningPath {
 	public void setNumberOfRatings(int numberOfRatings) {
 	  this.numberOfRatings = numberOfRatings;
 	}
+
+    public void setCompletion(double c){
+      this.completion  = c;
+    }
+    public double getCompletion(){
+      return completion;
+    }
 
 
 

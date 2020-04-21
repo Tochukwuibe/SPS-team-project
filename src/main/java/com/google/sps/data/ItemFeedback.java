@@ -8,19 +8,21 @@ public class ItemFeedback implements Json {
     private String userId;
     private int rating;
     private boolean completed;
+    private long learningSection;
 
 
-    public ItemFeedback (long id, long learningPath, long learningItem) {
-        this(id, learningPath, learningItem, "", 0, false);
+    public ItemFeedback (long id, long learningPath, long learningSection, long learningItem) {
+        this(id, learningPath,learningSection,learningItem, "", 0, false);
     }
 
-    public ItemFeedback (long learningPath, long learningItem, String userId, int rating, boolean completed) {
-        this(0, learningPath, learningItem, userId, rating, completed);
+    public ItemFeedback (long learningPath, long learningSection, long learningItem, String userId, int rating, boolean completed) {
+        this(0, learningPath, learningItem, learningSection, userId, rating, completed);
     }
 
-    public ItemFeedback (long id, long learningPath, long learningItem, String userId, int rating, boolean completed) {
+    public ItemFeedback (long id, long learningPath, long learningSection, long learningItem, String userId, int rating, boolean completed) {
         this.id = id;
         this.learningPath = learningPath;
+        this.learningSection = learningSection;
         this.learningItem = learningItem;
         this.userId = userId;
         this.rating = rating;
@@ -30,6 +32,7 @@ public class ItemFeedback implements Json {
     public ItemFeedback(Entity e) {
 		this.id = (long) e.getKey().getId();
 		this.learningPath = (long) e.getProperty("learningPath");
+        this.learningSection = (long) e.getProperty("learningSection");
         this.learningItem = (long) e.getProperty("learningItem");
 		this.userId = (String) e.getProperty("userId");
 		this.rating = (int) e.getProperty("rating");
@@ -42,6 +45,9 @@ public class ItemFeedback implements Json {
 
     public long getLearningPath() {
         return learningPath;
+    }
+    public long getLearningSection(){
+        return learningSection;
     }
 
     public long getLearningItem() {

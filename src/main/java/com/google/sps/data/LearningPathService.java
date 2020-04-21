@@ -96,21 +96,6 @@ public class LearningPathService {
 		datastore.put(e);
 	}
 
-    private void storeFeedback(ItemFeedback feedback) {
-		storeFeedback(feedback, feedback.getLearningItem(), feedback.getLearningPath());
-	}
-
-	private void storeFeedback(ItemFeedback item, long learningItemId, long learningPathId) {
-		Entity e = new Entity(ITEM_FEEDBACK, item.getId());
-		e.setProperty("learningPath", learningPathId);
-		e.setProperty("learningItem", learningItemId);
-		e.setProperty("userId", item.getUserId());
-		e.setProperty("rating", item.getRating());
-		e.setProperty("completed", item.isCompleted());
-        e.setProperty("id", item.getId());
-		datastore.put(e);
-	}
-
 	public LearningPath load(long id) throws EntityNotFoundException {
 		Entity path = datastore.get(KeyFactory.createKey(LEARNING_PATH, id));
 		String name = (String) path.getProperty("name");
@@ -152,14 +137,14 @@ public class LearningPathService {
 		return mapEntityToLearningItem(itemId, item);
 	}
 
-    public LearningItem loadFeedbackItems(long itemId) throws EntityNotFoundException {
-		Entity item = datastore.get(KeyFactory.createKey(LEARNING_ITEM, itemId));
-		return mapEntityToLearningItem(itemId, item);
-	}
     private LearningItem mapEntityToLearningItem(long sectionId, Entity e) {
 		return new LearningItem(e);
 	}
 
+    public ItemFeedback loadItemFeedback(long itemId) throws EntityNotFoundException {
+		Entity item = datastore.get(KeyFactory.createKey(ITEM_FEEDBACK, itemId));
+		return mapEntityToItemFeedback(itemId, item);
+	}
     public List<ItemFeedback> loadItemFeedbacks(long learningPathId) throws EntityNotFoundException {
 		Query query = new Query(ITEM_FEEDBACK).addSort("id")
 				.setFilter(new Query.FilterPredicate("learningPath", Query.FilterOperator.EQUAL, learningPathId));
@@ -183,35 +168,27 @@ public class LearningPathService {
 	}
 
 
-    public long getSectionCompletion(long userId, long sectionId ,long learningPath)throws EntityNotFoundException { 
+    public double getSectionCompletion(long userId, LearningSection section ,long learningPath)throws EntityNotFoundException { 
        // filter 
         List<ItemFeedback> feedbacks = loadItemFeedbacksUser(userId).stream()
-                                    .filter( f -> f.isCompleted()).collect(Collectors.toList());
-        List<LearningItem> itemsInSection = loadItems(sectionId);
+                                    .filter( f -> f.getLearningSection() == section.getId() && f.isCompleted()).collect(Collectors.toList());
 
-        List<Long> feedbackId = feedbacks.stream().map(p -> p.getLearningItem())
-                                .collect(Collectors.toList()); 
-
-        List<Long> sectionIds = itemsInSection.stream().map(p -> p.getId())
-                                .collect(Collectors.toList()); 
-       
-        feedbackId.retainAll(sectionIds);
-
-        long proportion = feedbackId.size()/itemsInSection.size();
+        double proportion = feedbacks.size()/section.getNumItems();
        
         return proportion;
     }
 
-    public long getLearningPathCompletion(long userId, long learningPathId)throws EntityNotFoundException {
+    public LearningPath getLearningPathCompletion(long userId, long learningPathId)throws EntityNotFoundException {
         LearningPath path = load(learningPathId);
         List<LearningSection> sections = path.getSections();
         long completion = 0;
 
         for ( LearningSection s : sections){
-            completion += getSectionCompletion(userId,s.getId(), learningPathId);
+            completion += getSectionCompletion(userId, s, learningPathId);
         }
+        path.setCompletion(completion / sections.size());
 
-        return (completion / sections.size());
+        return path;
     }
 
 	// public void delete(long id) {
@@ -240,6 +217,7 @@ public class LearningPathService {
 		return new ItemFeedback(
 				feedback.getKey().getId(),
 				(long) feedback.getProperty("learningPath"),
+                (long) feedback.getProperty("learningSection"),
 				(long) feedback.getProperty("learningItem"),
 				(String) feedback.getProperty("userId"),
 				((Long) feedback.getProperty("rating")).intValue(),
@@ -247,7 +225,7 @@ public class LearningPathService {
 		);
 	}
 
-	public LearningItem submitFeedback(long pathId, long learningItemId, String userId, int rating, boolean completed) throws EntityNotFoundException {
+	public LearningItem submitFeedback(long pathId, long learningItemId, long learningSection, String userId, int rating, boolean completed) throws EntityNotFoundException {
 		LearningItem item = loadItem(learningItemId);
 		// TODO warn if learning item is not found
 
@@ -257,6 +235,7 @@ public class LearningPathService {
 		if (existing == null) {
 			Entity feedback = new Entity(ITEM_FEEDBACK);
 			feedback.setProperty("learningPath", pathId);
+            feedback.setProperty("learningSection",learningSection);
 			feedback.setProperty("userId", userId);
 			feedback.setProperty("rating", rating);
 			feedback.setProperty("completed", completed);
@@ -271,6 +250,17 @@ public class LearningPathService {
 
 			existing.setRating(rating);
 			existing.setCompleted(completed);
+
+            Entity feedback = new Entity(ITEM_FEEDBACK);
+			feedback.setProperty("learningPath", existing.getLearningPath());
+            feedback.setProperty("learningSection",existing.getLearningSection());
+			feedback.setProperty("userId", existing.getUserId());
+			feedback.setProperty("rating", existing.getRating());
+			feedback.setProperty("completed", existing.isCompleted());
+			feedback.setProperty("learningItem", existing.getLearningItem());
+			datastore.put(feedback);
+
+
 		}
 
 		item.setRatingCount(item.getRatingCount() + countDelta);
