@@ -167,13 +167,12 @@ public class LearningPathService {
 		return new ItemFeedback(e);
 	}
 
-
     public double getSectionCompletion(long userId, LearningSection section ,long learningPath)throws EntityNotFoundException { 
        // filter 
-        List<ItemFeedback> feedbacks = loadItemFeedbacksUser(userId).stream()
-                                    .filter( f -> f.getLearningSection() == section.getId() && f.isCompleted()).collect(Collectors.toList());
-
-        double proportion = feedbacks.size()/section.getNumItems();
+        double feedbackCount = loadItemFeedbacksUser(userId).stream()
+                                    .filter( f -> f.getLearningSection() == section.getId() && f.isCompleted()).count();
+                                    
+        double proportion = feedbackCount/section.getNumItems();
        
         return proportion;
     }
@@ -225,9 +224,12 @@ public class LearningPathService {
 		);
 	}
 
-	public LearningItem submitFeedback(long pathId, long learningItemId, long learningSection, String userId, int rating, boolean completed) throws EntityNotFoundException {
+	public LearningItem submitFeedback(long pathId, long learningItemId, String userId, int rating, boolean completed) throws EntityNotFoundException {
 		LearningItem item = loadItem(learningItemId);
 		// TODO warn if learning item is not found
+        if ( item == null){
+            return null;
+        }
 
 		long countDelta, ratingDelta;
 
@@ -235,7 +237,7 @@ public class LearningPathService {
 		if (existing == null) {
 			Entity feedback = new Entity(ITEM_FEEDBACK);
 			feedback.setProperty("learningPath", pathId);
-            feedback.setProperty("learningSection",learningSection);
+            feedback.setProperty("learningSection",item.getLearningSection());
 			feedback.setProperty("userId", userId);
 			feedback.setProperty("rating", rating);
 			feedback.setProperty("completed", completed);
