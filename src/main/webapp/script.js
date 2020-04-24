@@ -24,25 +24,21 @@ function initializeModal(itemId, itemName) {
     const form = $("#feedback");
 }
 
-function submitFeedback() {
+async function submitFeedback() {
     console.log("Sending the submission form info.");
     const itemId = document.getElementById("feedback-id").innerText;
     const pathId = document.getElementById("path-id").innerText;
     const options = document.getElementById("ratingValues");
     const rating = options.options[options.selectedIndex].value;
 
-    const headers = new Headers();
-    headers.append("rating", rating);
-    //If done is always going to be true, is
-    //it really necessary to be sent?
-    headers.append("done", "true");
-    const init = { method: 'POST',
-               headers: headers,
-               mode: 'cors',
-               cache: 'default' };
-    const path = '/paths/' + pathId + '/item/' + itemId;
+    const body = new URLSearchParams();
+    body.append('rating', rating);
+    body.append('done', true);
 
-    fetch(path, init).then(response => response.text()).then((finalResponse) => {
-        //What should be done with it?
+    const path = '/item/' + itemId;
+    const response = await fetch("path", {
+        method: 'POST',
+        body
     });
+    const resText = await response.text();
 }
