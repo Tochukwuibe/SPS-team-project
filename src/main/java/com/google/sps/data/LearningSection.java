@@ -38,4 +38,7 @@ public class LearningSection {
 	public String getDescription() {
 		return description;
 	}
+    public long getNumItems(){
+        return items.size();
+    }
 }

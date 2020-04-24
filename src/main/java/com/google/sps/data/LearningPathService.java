@@ -19,6 +19,7 @@ public class LearningPathService {
 	private static final String LEARNING_PATH = "LearningPath";
 	private static final String LEARNING_SECTION = "LearningSection";
 	private static final String LEARNING_ITEM = "LearningItem";
+	private static final String ITEM_FEEDBACK = "ItemFeedback";
 
 	private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
@@ -140,14 +141,65 @@ public class LearningPathService {
 		return new LearningItem(e);
 	}
 
+	public ItemFeedback loadItemFeedback(long itemId) throws EntityNotFoundException {
+		Entity item = datastore.get(KeyFactory.createKey(ITEM_FEEDBACK, itemId));
+		return mapEntityToItemFeedback(item);
+	}
+
+	public List<ItemFeedback> loadItemFeedbacks(long learningPathId) throws EntityNotFoundException {
+		Query query = new Query(ITEM_FEEDBACK).addSort("id")
+				.setFilter(new Query.FilterPredicate("learningPath", Query.FilterOperator.EQUAL, learningPathId));
+
+		List<Entity> items = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
+
+		return items.stream().map(this::mapEntityToItemFeedback).collect(Collectors.toList());
+	}
+
+	public List<ItemFeedback> loadItemFeedback(String userID, long learningSection) {
+		Query query = new Query(ITEM_FEEDBACK)
+				.setFilter(new Query.CompositeFilter(Query.CompositeFilterOperator.AND, Arrays.asList(
+						new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userID),
+						new Query.FilterPredicate("learningSection", Query.FilterOperator.EQUAL, learningSection))));
+
+		List<Entity> items = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
+
+		return items.stream().map(this::mapEntityToItemFeedback).collect(Collectors.toList());
+	}
+
+	private ItemFeedback mapEntityToItemFeedback(Entity e) {
+		return new ItemFeedback(e);
+	}
+
+	public double getSectionCompletion(String userId, LearningSection section) {
+		// filter
+		double feedbackCount = loadItemFeedback(userId, section.getId()).stream()
+				.filter(ItemFeedback::isCompleted).count();
+
+		double proportion = feedbackCount / section.getNumItems();
+
+		return proportion;
+	}
+
+	public LearningPath getLearningPathCompletion(String userId, long learningPathId) throws EntityNotFoundException {
+		LearningPath path = load(learningPathId);
+		List<LearningSection> sections = path.getSections();
+		double completion = 0;
+
+		for (LearningSection s : sections) {
+			completion += getSectionCompletion(userId, s);
+		}
+		path.setCompletion(completion / sections.size());
+
+		return path;
+	}
+
 	// public void delete(long id) {
 	// Key taskKey = KeyFactory.createKey(kind, id);
 	// datastore.delete(taskKey);
 	// }
 
-	private static final String ITEM_FEEDBACK = "itemFeedback";
 
-	public ItemFeedback getOne(String userId, long learningItem) {
+	public ItemFeedback findFeedback(String userId, long learningItem) {
 
 		Query.CompositeFilter filter = new Query.CompositeFilter(
 				Query.CompositeFilterOperator.AND,
@@ -167,6 +219,7 @@ public class LearningPathService {
 		return new ItemFeedback(
 				feedback.getKey().getId(),
 				(long) feedback.getProperty("learningPath"),
+				(long) feedback.getProperty("learningSection"),
 				(long) feedback.getProperty("learningItem"),
 				(String) feedback.getProperty("userId"),
 				((Long) feedback.getProperty("rating")).intValue(),
@@ -177,13 +230,17 @@ public class LearningPathService {
 	public LearningItem submitFeedback(long pathId, long learningItemId, String userId, int rating, boolean completed) throws EntityNotFoundException {
 		LearningItem item = loadItem(learningItemId);
 		// TODO warn if learning item is not found
+		if (item == null) {
+			return null;
+		}
 
 		long countDelta, ratingDelta;
 
-		ItemFeedback existing = getOne(userId, learningItemId);
+		ItemFeedback existing = findFeedback(userId, learningItemId);
 		if (existing == null) {
 			Entity feedback = new Entity(ITEM_FEEDBACK);
 			feedback.setProperty("learningPath", pathId);
+			feedback.setProperty("learningSection", item.getLearningSection());
 			feedback.setProperty("userId", userId);
 			feedback.setProperty("rating", rating);
 			feedback.setProperty("completed", completed);
@@ -198,6 +255,7 @@ public class LearningPathService {
 
 			existing.setRating(rating);
 			existing.setCompleted(completed);
+			updateFeedback(existing);
 		}
 
 		item.setRatingCount(item.getRatingCount() + countDelta);
@@ -207,4 +265,14 @@ public class LearningPathService {
 		return item;
 	}
 
+	private void updateFeedback(ItemFeedback existing) {
+		Entity feedback = new Entity(ITEM_FEEDBACK, existing.getId());
+		feedback.setProperty("learningPath", existing.getLearningPath());
+		feedback.setProperty("learningSection", existing.getLearningSection());
+		feedback.setProperty("userId", existing.getUserId());
+		feedback.setProperty("rating", existing.getRating());
+		feedback.setProperty("completed", existing.isCompleted());
+		feedback.setProperty("learningItem", existing.getLearningItem());
+		datastore.put(feedback);
+	}
 }

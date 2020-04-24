@@ -51,7 +51,7 @@ public class ItemFeedbackServlet extends HttpServlet {
 
 			boolean completed = Boolean.parseBoolean(request.getParameter("completed"));
 			int rating = Integer.parseInt(request.getParameter("rating"));
-
+           
 			LearningItem learningItem = learningPathService.submitFeedback(pathId, ItemId, user.getId(), rating, completed);
 
 			// anonymous class
