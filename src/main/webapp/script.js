@@ -31,26 +31,18 @@ function submitFeedback() {
     const options = document.getElementById("ratingValues");
     const rating = options.options[options.selectedIndex].value;
 
-    const XHR = new XMLHttpRequest();
-    const FD = new FormData();
-    FD.append("rating", rating);
-    FD.append("item-id", itemId);
-
-    // Define what happens on successful data submission
-    XHR.addEventListener( 'load', function(event) {
-        alert( 'Yeah! Data sent and response loaded.' );
-    } );
-
-    // Define what happens in case of error
-    XHR.addEventListener( 'error', function(event) {
-        alert( 'Oops! Something went wrong.' );
-    } );
-
-    // Set up our request
+    const headers = new Headers();
+    headers.append("rating", rating);
+    //If done is always going to be true, is
+    //it really necessary to be sent?
+    headers.append("done", "true");
+    const init = { method: 'POST',
+               headers: headers,
+               mode: 'cors',
+               cache: 'default' };
     const path = '/paths/' + pathId + '/item/' + itemId;
-    console.log("path is " + path);
-    XHR.open('POST', path);
 
-    // Finally, send our data.
-    XHR.send(FD);
+    fetch(path, init).then(response => response.text()).then((finalResponse) => {
+        //What should be done with it?
+    });
 }
