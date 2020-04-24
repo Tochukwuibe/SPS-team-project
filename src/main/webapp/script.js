@@ -17,12 +17,43 @@ $('#myModal').on('shown.bs.modal', function () {
 });
 
 function initializeModal(pathId, itemId, itemName) {
-    console.log("initializing", arguments)
+    console.log("initializing", arguments);
+
+    //var myvariable = "${pathId}";
+    //alert("PathId is " + myvariable);
 
     $("#feedback-title").text(itemName);
+    $("#feedback-id").text(itemId);
     const form = $("#feedback");
 }
 
 function submitFeedback() {
-  // TODO
+    console.log("Sending the submission form info.");
+    const itemId = document.getElementById("feedback-id").innerText;
+    const pathId = document.getElementById("path-id").innerText;
+    const options = document.getElementById("ratingValues");
+    const rating = options.options[options.selectedIndex].value;
+
+    const XHR = new XMLHttpRequest();
+    const FD = new FormData();
+    FD.append("rating", rating);
+    FD.append("item-id", itemId);
+
+    // Define what happens on successful data submission
+    XHR.addEventListener( 'load', function(event) {
+        alert( 'Yeah! Data sent and response loaded.' );
+    } );
+
+    // Define what happens in case of error
+    XHR.addEventListener( 'error', function(event) {
+        alert( 'Oops! Something went wrong.' );
+    } );
+
+    // Set up our request
+    const path = '/paths/' + pathId + '/item/' + itemId;
+    console.log("path is " + path);
+    XHR.open('POST', path);
+
+    // Finally, send our data.
+    XHR.send(FD);
 }
