@@ -16,11 +16,8 @@ $('#myModal').on('shown.bs.modal', function () {
     $('#myInput').trigger('focus')
 });
 
-function initializeModal(pathId, itemId, itemName) {
+function initializeModal(itemId, itemName) {
     console.log("initializing", arguments);
-
-    //var myvariable = "${pathId}";
-    //alert("PathId is " + myvariable);
 
     $("#feedback-title").text(itemName);
     $("#feedback-id").text(itemId);

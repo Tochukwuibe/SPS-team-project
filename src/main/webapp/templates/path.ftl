@@ -41,7 +41,7 @@
                                         <a href="${item.url}/" class="btn btn-primary">Start Learning</a>
                                         <a href="#" class="btn btn-secondary">Done</a>
                                         <button type="button" class="btn btn-primary"
-                                                onclick="initializeModal('111', '${item.id}', '${item.name}')"
+                                                onclick="initializeModal('${item.id}', '${item.name}')"
                                                 data-toggle="modal" data-target="#exampleModal">Feedback</button>
                                 </div>
                         </div>
