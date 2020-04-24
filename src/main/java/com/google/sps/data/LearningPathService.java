@@ -253,16 +253,7 @@ public class LearningPathService {
 			existing.setRating(rating);
 			existing.setCompleted(completed);
 
-            Entity feedback = new Entity(ITEM_FEEDBACK);
-			feedback.setProperty("learningPath", existing.getLearningPath());
-            feedback.setProperty("learningSection",existing.getLearningSection());
-			feedback.setProperty("userId", existing.getUserId());
-			feedback.setProperty("rating", existing.getRating());
-			feedback.setProperty("completed", existing.isCompleted());
-			feedback.setProperty("learningItem", existing.getLearningItem());
-			datastore.put(feedback);
-
-
+			updateFeedback(existing);
 		}
 
 		item.setRatingCount(item.getRatingCount() + countDelta);
@@ -272,4 +263,14 @@ public class LearningPathService {
 		return item;
 	}
 
+	private void updateFeedback(ItemFeedback existing) {
+		Entity feedback = new Entity(ITEM_FEEDBACK, existing.getId());
+		feedback.setProperty("learningPath", existing.getLearningPath());
+		feedback.setProperty("learningSection",existing.getLearningSection());
+		feedback.setProperty("userId", existing.getUserId());
+		feedback.setProperty("rating", existing.getRating());
+		feedback.setProperty("completed", existing.isCompleted());
+		feedback.setProperty("learningItem", existing.getLearningItem());
+		datastore.put(feedback);
+	}
 }
