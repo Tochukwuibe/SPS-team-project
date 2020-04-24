@@ -196,7 +196,7 @@ public class LearningPathService {
 	// }
 
 
-	public ItemFeedback getOne(String userId, long learningItem) {
+	public ItemFeedback findFeedback(String userId, long learningItem) {
 
 		Query.CompositeFilter filter = new Query.CompositeFilter(
 				Query.CompositeFilterOperator.AND,
@@ -233,7 +233,7 @@ public class LearningPathService {
 
 		long countDelta, ratingDelta;
 
-		ItemFeedback existing = getOne(userId, learningItemId);
+		ItemFeedback existing = findFeedback(userId, learningItemId);
 		if (existing == null) {
 			Entity feedback = new Entity(ITEM_FEEDBACK);
 			feedback.setProperty("learningPath", pathId);
