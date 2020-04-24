@@ -155,9 +155,11 @@ public class LearningPathService {
 		return items.stream().map(this::mapEntityToItemFeedback).collect(Collectors.toList());
 	}
 
-	public List<ItemFeedback> loadItemFeedbacksUser(String userID) {
+	public List<ItemFeedback> loadItemFeedback(String userID, long learningSection) {
 		Query query = new Query(ITEM_FEEDBACK)
-				.setFilter(new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userID));
+				.setFilter(new Query.CompositeFilter(Query.CompositeFilterOperator.AND, Arrays.asList(
+						new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userID),
+						new Query.FilterPredicate("learningSection", Query.FilterOperator.EQUAL, learningSection))));
 
 		List<Entity> items = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
 
@@ -168,10 +170,10 @@ public class LearningPathService {
 		return new ItemFeedback(e);
 	}
 
-	public double getSectionCompletion(String userId, LearningSection section, long learningPath) throws EntityNotFoundException {
+	public double getSectionCompletion(String userId, LearningSection section) {
 		// filter
-		double feedbackCount = loadItemFeedbacksUser(userId).stream()
-				.filter(f -> f.getLearningSection() == section.getId() && f.isCompleted()).count();
+		double feedbackCount = loadItemFeedback(userId, section.getId()).stream()
+				.filter(ItemFeedback::isCompleted).count();
 
 		double proportion = feedbackCount / section.getNumItems();
 
@@ -181,10 +183,10 @@ public class LearningPathService {
 	public LearningPath getLearningPathCompletion(String userId, long learningPathId) throws EntityNotFoundException {
 		LearningPath path = load(learningPathId);
 		List<LearningSection> sections = path.getSections();
-		long completion = 0;
+		double completion = 0;
 
 		for (LearningSection s : sections) {
-			completion += getSectionCompletion(userId, s, learningPathId);
+			completion += getSectionCompletion(userId, s);
 		}
 		path.setCompletion(completion / sections.size());
 

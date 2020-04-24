@@ -38,7 +38,7 @@ public class ItemFeedback implements Json {
 		this.learningItem = (long) e.getProperty("learningItem");
 		this.userId = (String) e.getProperty("userId");
 		this.rating = ((Long) e.getProperty("rating")).intValue();
-		this.completed = e.getProperty("complete") == Boolean.TRUE /* may be null */;
+		this.completed = e.getProperty("completed") == Boolean.TRUE /* may be null */;
 	}
 
 	public long getId() {
