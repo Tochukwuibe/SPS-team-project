@@ -143,7 +143,7 @@ public class LearningPathService {
 
     public ItemFeedback loadItemFeedback(long itemId) throws EntityNotFoundException {
 		Entity item = datastore.get(KeyFactory.createKey(ITEM_FEEDBACK, itemId));
-		return mapEntityToItemFeedback(itemId, item);
+		return mapEntityToItemFeedback(item);
 	}
     public List<ItemFeedback> loadItemFeedbacks(long learningPathId) throws EntityNotFoundException {
 		Query query = new Query(ITEM_FEEDBACK).addSort("id")
@@ -151,23 +151,23 @@ public class LearningPathService {
 
 		List<Entity> items = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
 
-		return items.stream().map(e -> mapEntityToItemFeedback(learningPathId, e)).collect(Collectors.toList());
+		return items.stream().map(this::mapEntityToItemFeedback).collect(Collectors.toList());
 	}
 
-    public List<ItemFeedback> loadItemFeedbacksUser(long userID) throws EntityNotFoundException {
+    public List<ItemFeedback> loadItemFeedbacksUser(String userID) throws EntityNotFoundException {
 		Query query = new Query(ITEM_FEEDBACK).addSort("id")
 			.setFilter(new Query.FilterPredicate("userId", Query.FilterOperator.EQUAL, userID));
 
 		List<Entity> items = datastore.prepare(query).asList(FetchOptions.Builder.withDefaults());
 
-		return items.stream().map(e -> mapEntityToItemFeedback(userID, e)).collect(Collectors.toList());
+		return items.stream().map(this::mapEntityToItemFeedback).collect(Collectors.toList());
 	}
 
-    private ItemFeedback mapEntityToItemFeedback(long sectionId, Entity e) {
+    private ItemFeedback mapEntityToItemFeedback(Entity e) {
 		return new ItemFeedback(e);
 	}
 
-    public double getSectionCompletion(long userId, LearningSection section ,long learningPath)throws EntityNotFoundException { 
+    public double getSectionCompletion(String userId, LearningSection section ,long learningPath)throws EntityNotFoundException {
        // filter 
         double feedbackCount = loadItemFeedbacksUser(userId).stream()
                                     .filter( f -> f.getLearningSection() == section.getId() && f.isCompleted()).count();
@@ -177,7 +177,7 @@ public class LearningPathService {
         return proportion;
     }
 
-    public LearningPath getLearningPathCompletion(long userId, long learningPathId)throws EntityNotFoundException {
+    public LearningPath getLearningPathCompletion(String userId, long learningPathId)throws EntityNotFoundException {
         LearningPath path = load(learningPathId);
         List<LearningSection> sections = path.getSections();
         long completion = 0;
