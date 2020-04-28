@@ -16,13 +16,30 @@ $('#myModal').on('shown.bs.modal', function () {
     $('#myInput').trigger('focus')
 });
 
-function initializeModal(pathId, itemId, itemName) {
-    console.log("initializing", arguments)
+function initializeModal(itemId, itemName) {
+    console.log("initializing", arguments);
 
     $("#feedback-title").text(itemName);
-    const form = $("#feedback");
+    $("#feedback-id").attr("value", itemId);
 }
 
-function submitFeedback() {
-  // TODO
+async function submitFeedback() {
+    console.log("Sending the submission form info.");
+    const itemId = document.getElementById("feedback-id").value;
+    const pathId = document.getElementById("path-id").value;
+    const rating = document.getElementById("ratingValues").value;
+
+    console.log("TESTING VALUES: itemId " + itemId +
+    " pathId " + pathId + " rating " + rating);
+
+    const body = new URLSearchParams();
+    body.append('rating', rating);
+    body.append('done', true);
+
+    const path = `/learning-path/${pathId}/item/${itemId}`;
+    const response = await fetch(path, {
+        method: 'POST',
+        body: body
+    });
+    const resText = await response.text();
 }
