@@ -32,7 +32,7 @@
                                                     </#if>
                                                     ${item.name}
                                                 </h5>
-                                                <p class="col-md-4">Rating: 100%</p>
+                                                <p class="col-md-4">Rating: <#if item.rating??>${item.rating}<#else>-</#if>/5</p>
                                         </div>
                                 </div>
                                 <div class="card-body hidden">
