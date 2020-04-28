@@ -32,19 +32,14 @@ async function submitFeedback() {
     console.log("TESTING VALUES: itemId " + itemId +
     " pathId " + pathId + " rating " + rating);
 
-    //const form = $("#feedback");
-    const FD = new FormData();
-    FD.append("rating", rating);
-    FD.append("done", true);
+    const body = new URLSearchParams();
+    body.append('rating', rating);
+    body.append('done', true);
 
-    //const body = new URLSearchParams();
-    //body.append('rating', rating);
-    //body.append('done', true);
-
-    const path = '/item/' + itemId;
-    const response = await fetch("path", {
+    const path = `/learning-path/${pathId}/item/${itemId}`;
+    const response = await fetch(path, {
         method: 'POST',
-        FD
+        body: body
     });
     const resText = await response.text();
 }
