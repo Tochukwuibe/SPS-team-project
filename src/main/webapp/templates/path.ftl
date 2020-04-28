@@ -38,10 +38,11 @@
                                 <div class="card-body hidden">
                                         <p class="card-text">${item.description}</p>
                                         <a href="${item.url}/" class="btn btn-primary">Start Learning</a>
-                                        <a href="#" class="btn btn-secondary">Done</a>
-                                        <button type="button" class="btn btn-primary"
+                                        <#if user.id != "">
+                                            <button type="button" class="btn btn-secondary"
                                                 onclick="initializeModal('${item.id}', '${item.name}')"
-                                                data-toggle="modal" data-target="#exampleModal">Feedback</button>
+                                                data-toggle="modal" data-target="#exampleModal">Done</button>
+                                        </#if>
                                 </div>
                         </div>
                 </#list>
