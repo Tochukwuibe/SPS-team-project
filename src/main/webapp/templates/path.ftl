@@ -2,7 +2,6 @@
 
 <div class="container">
         <h1>${path.name}</h1>
-        <p id="path-id" hidden>${path.id}</p>
 
     <#list path.sections as sec>
             <div class="section">
@@ -63,7 +62,8 @@
                         <div class="modal-body">
                                 <form id="feedback">
                                         <h4 id="feedback-title">Item Name</h4>
-                                        <h6 id="feedback-id" value="" hidden><h6>
+                                        <input id="path-id" type="text" value="${path.id}" name="path-id" hidden>
+                                        <input id="feedback-id" type="text" value="..." name="feedback-id" hidden>
                                         <label for="ratingValues">Rating:</label>
                                         <select class="form-control" id="ratingValues">
                                                 <option>1</option>

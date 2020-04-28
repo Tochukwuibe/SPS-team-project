@@ -20,25 +20,31 @@ function initializeModal(itemId, itemName) {
     console.log("initializing", arguments);
 
     $("#feedback-title").text(itemName);
-    $("#feedback-id").text(itemId);
-    const form = $("#feedback");
+    $("#feedback-id").attr("value", itemId);
 }
 
 async function submitFeedback() {
     console.log("Sending the submission form info.");
-    const itemId = document.getElementById("feedback-id").innerText;
-    const pathId = document.getElementById("path-id").innerText;
-    const options = document.getElementById("ratingValues");
-    const rating = options.options[options.selectedIndex].value;
+    const itemId = document.getElementById("feedback-id").value;
+    const pathId = document.getElementById("path-id").value;
+    const rating = document.getElementById("ratingValues").value;
 
-    const body = new URLSearchParams();
-    body.append('rating', rating);
-    body.append('done', true);
+    console.log("TESTING VALUES: itemId " + itemId +
+    " pathId " + pathId + " rating " + rating);
+
+    //const form = $("#feedback");
+    const FD = new FormData();
+    FD.append("rating", rating);
+    FD.append("done", true);
+
+    //const body = new URLSearchParams();
+    //body.append('rating', rating);
+    //body.append('done', true);
 
     const path = '/item/' + itemId;
     const response = await fetch("path", {
         method: 'POST',
-        body
+        FD
     });
     const resText = await response.text();
 }
