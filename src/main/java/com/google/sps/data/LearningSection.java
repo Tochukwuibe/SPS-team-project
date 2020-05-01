@@ -2,6 +2,7 @@ package com.google.sps.data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class LearningSection {
 	private final long id;
@@ -38,7 +39,17 @@ public class LearningSection {
 	public String getDescription() {
 		return description;
 	}
-    public long getNumItems(){
-        return items.size();
-    }
+
+	public long getNumItems() {
+		return items.size();
+	}
+
+	/**
+	 * Find a learning item in this section by ID. May return no result if item (no longer) exists.
+	 *
+	 * @param learningItem the item Id
+	 */
+	public Optional<LearningItem> getItemById(long learningItem) {
+		return items.stream().filter(item -> item.getId() == learningItem).findAny();
+	}
 }

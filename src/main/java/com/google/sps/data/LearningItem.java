@@ -13,8 +13,15 @@ public class LearningItem {
 	private final long learningSection;
 	private final long learningPath;
 
+	// total ratings count by all users
 	private long ratingCount;
+	// total score by all users
 	private long ratingTotal;
+
+	// item completed by current user
+	private boolean completed;
+	// Rating assigned by the current user
+	private long userRating;
 
 	public LearningItem(String name, long id, String description, long sequence, String url, int ratingCount, int ratingTotal) {
 		this.name = name;
@@ -87,6 +94,32 @@ public class LearningItem {
 		return ratingTotal;
 	}
 
+	public boolean isCompleted() {
+		return completed;
+	}
+
+	public void setCompleted(boolean completed) {
+		this.completed = completed;
+	}
+
+	public long getUserRating() {
+		return userRating;
+	}
+
+	public void setUserRating(long userRating) {
+		this.userRating = userRating;
+	}
+
+	/**
+	 * Update this LearningItem with specific user feedback
+	 *
+	 * @param fb
+	 */
+	public void setUserValues(ItemFeedback fb) {
+		setCompleted(fb.isCompleted());
+		setUserRating(fb.getRating());
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -114,6 +147,4 @@ public class LearningItem {
 			return false;
 		return true;
 	}
-
-
 }

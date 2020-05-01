@@ -1,18 +1,18 @@
 <#include "common/header.ftl">
 
 <div class="container">
-        <h1>${path.name}</h1>
+        <h1>${path.name} (${path.completionPercentage}% done)</h1>
 
     <#list path.sections as sec>
             <div class="section">
                     <h5>Section: ${sec.name}</h5>
                     <p>${sec.description}</p>
                 <#list sec.items as item>
-                        <div class="card mb-2">
+                        <div class="learning-item ${item.completed?string('completed','incomplete')} card mb-2">
                                 <div class="card-header">
                                         <div class="row">
                                                 <h5 class="col-md-8">
-                                                    <#if false>
+                                                    <#if item.completed>
                                                             <!-- completed icon -->
                                                             <svg class="bi bi-check-box" width="1em" height="1em"
                                                                  viewBox="0 0 16 16" fill="currentColor"

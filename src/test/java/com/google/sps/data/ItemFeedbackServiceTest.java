@@ -8,7 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class ItemFeedbackServiceTest {
 
@@ -101,16 +102,20 @@ public class ItemFeedbackServiceTest {
 
 	@Test
 	public void testCompletion() throws EntityNotFoundException {
-		LearningPath path = svc.getLearningPathCompletion(USER1, this.path.getId());
+		LearningPath path = svc.loadForUser(this.path.getId(), USER1);
 		assertEquals(0, path.getCompletion(), 0.001);
 
 		svc.submitFeedback(this.path.getId(), item1.getId(), USER1, 5, true);
 
-		path = svc.getLearningPathCompletion(USER1, this.path.getId());
+		path = svc.loadForUser(this.path.getId(), USER1);
 		assertEquals(0.25, path.getCompletion(), 0.001);
+		assertTrue(path.getSections().get(0).getItems().get(0).isCompleted());
+		assertEquals(5, path.getSections().get(0).getItems().get(0).getUserRating());
+		assertFalse(path.getSections().get(0).getItems().get(1).isCompleted());
 
-		svc.submitFeedback(this.path.getId(), item2.getId(), USER1, 5, true);
-		path = svc.getLearningPathCompletion(USER1, this.path.getId());
+		svc.submitFeedback(this.path.getId(), item2.getId(), USER1, 3, true);
+		path = svc.loadForUser(this.path.getId(), USER1);
 		assertEquals(0.50, path.getCompletion(), 0.001);
+		assertEquals(3, path.getSections().get(0).getItems().get(1).getUserRating());
 	}
 }
