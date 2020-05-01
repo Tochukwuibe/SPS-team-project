@@ -68,6 +68,7 @@ public class LearningPath {
       return completion;
     }
 
-
-
+    public String getCompletionPercentage() {
+		return String.format("%.0f", completion*100);
+	}
 }

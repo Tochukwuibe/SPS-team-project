@@ -34,7 +34,7 @@ async function submitFeedback() {
 
     const body = new URLSearchParams();
     body.append('rating', rating);
-    body.append('done', true);
+    body.append('completed', "true");
 
     const path = `/learning-path/${pathId}/item/${itemId}`;
     const response = await fetch(path, {
@@ -42,4 +42,5 @@ async function submitFeedback() {
         body: body
     });
     const resText = await response.text();
+    document.location.reload(); // TODO dynamic update
 }
