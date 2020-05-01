@@ -170,17 +170,18 @@ public class LearningPathService {
 		return new ItemFeedback(e);
 	}
 
-	public double getSectionCompletion(String userId, LearningSection section) {
-		// filter
-		double feedbackCount = loadItemFeedback(userId, section.getId()).stream()
-				.filter(ItemFeedback::isCompleted).count();
+	private double getSectionCompletion(String userId, LearningSection section) {
+		List<ItemFeedback> feedback = loadItemFeedback(userId, section.getId());
+		for (ItemFeedback fb : feedback) {
+			section.getItemById(fb.getLearningItem())
+					.ifPresent(it -> it.setUserValues(fb));
+		}
 
-		double proportion = feedbackCount / section.getNumItems();
-
-		return proportion;
+		long completedCount = feedback.stream().filter(ItemFeedback::isCompleted).count();
+		return (double) completedCount / section.getNumItems();
 	}
 
-	public LearningPath getLearningPathCompletion(String userId, long learningPathId) throws EntityNotFoundException {
+	public LearningPath loadForUser(long learningPathId, String userId) throws EntityNotFoundException {
 		LearningPath path = load(learningPathId);
 		List<LearningSection> sections = path.getSections();
 		double completion = 0;

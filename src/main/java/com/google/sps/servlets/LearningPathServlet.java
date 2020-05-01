@@ -17,7 +17,6 @@ package com.google.sps.servlets;
 import com.google.appengine.api.datastore.EntityNotFoundException;
 import com.google.sps.data.LearningPath;
 import com.google.sps.data.LearningPathService;
-import com.google.sps.data.LearningSection;
 import com.google.sps.data.TestData;
 import com.google.sps.data.User;
 import com.google.sps.data.UserService;
@@ -55,7 +54,6 @@ public class LearningPathServlet extends HttpServlet {
 		User user = UserService.getUser();
 
 		System.out.println(request.getPathInfo());
-		// TODO figure out which path to load, based on the ID
 		String[] parts = request.getPathInfo().split("/");
 		if (parts.length != 2) {
 			throw new IllegalStateException(request.getPathInfo());
@@ -63,7 +61,13 @@ public class LearningPathServlet extends HttpServlet {
 		int id = Integer.parseInt(parts[1]);
 
 		try {
-			LearningPath path = service.load(id);
+			LearningPath path;
+			if (user.isLoggedIn()) {
+				path = service.loadForUser(id, user.getId());
+			} else {
+				path = service.load(id);
+			}
+
 			LearningPathModel model = new LearningPathModel(user, path);
 			renderer.renderLearningPath(model, response);
 		} catch (EntityNotFoundException e) {
