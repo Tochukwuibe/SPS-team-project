@@ -15,10 +15,12 @@
 package com.google.sps.servlets;
 
 import com.google.sps.data.LearningPathService;
+import com.google.sps.data.TestData;
 import com.google.sps.data.User;
 import com.google.sps.data.UserService;
 import com.google.sps.html.HtmlRenderer;
 import com.google.sps.html.LandingPageModel;
+import com.google.sps.html.LearningPathSummary;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -27,6 +29,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * Handle requests for the landing/welcome page
@@ -42,7 +45,6 @@ public class WelcomeServlet extends HttpServlet {
 		super.init(config);
 		renderer = new HtmlRenderer(config.getServletContext());
 		service = new LearningPathService();
-
 	}
 
 	@Override
@@ -50,8 +52,18 @@ public class WelcomeServlet extends HttpServlet {
 		User user = UserService.getUser();
 
 		LandingPageModel model = new LandingPageModel(user);
-		model.getLearningPaths().addAll(service.listLearningPaths());
+		model.getLearningPaths().addAll(getPaths());
 
 		renderer.renderLandingPage(model, response);
+	}
+
+	private List<LearningPathSummary> getPaths() {
+		List<LearningPathSummary> result = service.listLearningPaths();
+		if (result.isEmpty()) {
+			System.out.println("Performing one-time initialization of data...");
+			TestData.setupTestData(service);
+			result = service.listLearningPaths();
+		}
+		return result;
 	}
 }
